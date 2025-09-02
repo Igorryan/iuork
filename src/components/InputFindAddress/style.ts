@@ -10,6 +10,9 @@ export const Container = styled(View)`
   border-radius: 12px;
   padding: 0 12px;
   height: 58px;
+  position: relative;
+  z-index: 1;
+  overflow: visible;
 `;
 
 export const Icon = styled(Ionicons).attrs(({ theme }) => ({

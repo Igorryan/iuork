@@ -8,15 +8,15 @@ interface IBlockProps {
 export const ExpansiveView = styled(View).attrs<IBlockProps>(({ theme, isActive }) => ({
   style: {
     shadowColor: theme.COLORS.SHADOW,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: isActive ? 0.07 : 0,
-    shadowRadius: isActive ? 19 : 0,
-    elevation: isActive ? 2 : 0,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: isActive ? 0.08 : 0,
+    shadowRadius: isActive ? 20 : 0,
+    elevation: isActive ? 4 : 0,
   },
 }))<IBlockProps>`
   background-color: ${({ theme }) => theme.COLORS.WHITE};
 
-  margin-top: 16px;
+  border: 1px solid ${({ theme }) => theme.COLORS.GREY_10};
 
   border-radius: 24px;
 
@@ -31,9 +31,11 @@ export const BlockMinimized = styled(TouchableOpacity)<IBlockProps>`
   align-items: center;
   flex-direction: row;
   justify-content: space-between;
+  padding: 12px;
 
   width: 100%;
   padding: 20px 24px 24px;
+  border-radius: 12px;
 
   ${(props) =>
     !props.isActive &&

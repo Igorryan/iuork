@@ -11,7 +11,7 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 
 import * as S from './style';
 import { useTheme } from 'styled-components/native';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { IAddress } from '@api/mock/address';
 
 type formatAddressProps = {
@@ -47,7 +47,7 @@ export const InputFindAddress: React.FC<Props> = ({ changeAddress }) => {
       latitude: details.geometry.location.lat,
       longitude: details.geometry.location.lng,
       street: formattedAddress.route,
-      number: Number(formattedAddress.street_number),
+      number: Number(formattedAddress.street_number || 0) || 0,
       district: formattedAddress.sublocality_level_1,
       city: formattedAddress.administrative_area_level_2,
       state: formattedAddress.administrative_area_level_1,
@@ -66,6 +66,21 @@ export const InputFindAddress: React.FC<Props> = ({ changeAddress }) => {
         ref={inputRef}
         styles={{
           poweredContainer: { display: 'none' },
+          container: { flex: 1 },
+          listView: {
+            position: 'absolute',
+            top: 56 ,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            width: '100%',
+            borderWidth: 1,
+            borderColor: '#00000020',
+            elevation: 8,
+            borderRadius: 2,
+            backgroundColor: '#fff',
+          },
+          textInputContainer: { flex: 1, height: 58, alignItems: 'center' },
         }}
         textInputProps={{
           autoFocus: true,

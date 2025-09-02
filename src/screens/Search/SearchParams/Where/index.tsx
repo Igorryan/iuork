@@ -48,7 +48,7 @@ export const Where: React.FC<WhereProps> = ({ isActive, onPress, address, setAdd
       isActive={isActive}
       onPress={onPress}
       minimized={{
-        title: 'Onde',
+        title: 'Endereço',
         value: `${address ? `${address.street}` : 'Para onde?'}`,
       }}
       maximized={{
@@ -107,7 +107,7 @@ const HistoryItem = styled.TouchableOpacity`
 `;
 
 const HistoryItemText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.GREY_100};
+  color: ${({ theme }) => theme.COLORS.GREY_60};
   font-size: 16px;
 `;
 

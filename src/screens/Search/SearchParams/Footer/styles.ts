@@ -8,6 +8,8 @@ export const Footer = styled(View)`
   justify-content: space-between;
   align-items: center;
 
+  background-color: ${({ theme }) => theme.COLORS.WHITE};
+
   padding: 16px 24px 16px;
 
   border-top-width: 1px;

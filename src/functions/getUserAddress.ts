@@ -32,16 +32,23 @@ export async function getAddressHistory(): Promise<Address[]> {
 
 export async function addAddressToHistory(address: Address): Promise<void> {
   const history = await getAddressHistory();
-  const withoutDuplication = history.filter(
-    (item) =>
-      !(
-        item.latitude === address.latitude &&
-        item.longitude === address.longitude &&
-        item.street === address.street &&
-        item.number === address.number &&
-        item.city === address.city
-      ),
-  );
-  const updated = [address, ...withoutDuplication].slice(0, MAX_HISTORY_ITEMS);
+  const normalize = (a: Address) =>
+    `${(a.street || '').trim().toLowerCase()}|${Number(a.number || 0)}|${(a.city || '')
+      .trim()
+      .toLowerCase()}|${(a.state || '').trim().toLowerCase()}`;
+
+  const incomingKey = normalize(address);
+
+  // Remove qualquer ocorrência existente do mesmo endereço (normalizado)
+  const withoutDuplication = history.filter((item) => normalize(item) !== incomingKey);
+
+  // Move o endereço atual para o topo e limita o tamanho do histórico
+  const updated = [
+    {
+      ...address,
+      number: Number(address.number || 0) || 0,
+    },
+    ...withoutDuplication,
+  ].slice(0, MAX_HISTORY_ITEMS);
   await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
 }

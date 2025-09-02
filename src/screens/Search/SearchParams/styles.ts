@@ -4,22 +4,27 @@ import { Ionicons } from '@expo/vector-icons';
 
 export const Container = styled(KeyboardAvoidingView)`
   flex: 1;
-  background-color: ${({ theme }) => theme.COLORS.WHITE};
+  background-color: ${({ theme }) => theme.COLORS.BACKGROUND};
 `;
 
 export const ContentView = styled(View)`
   flex: 1;
-  padding: 24px;
+  padding: 20px;
+  gap: 10px;
 `;
 
 export const CloseIconContainer = styled(TouchableOpacity)`
   align-self: flex-end;
-  padding: 4px;
-  margin-bottom: 8px;
+  margin-top: -10px;
+  margin-bottom: 10px;
 `;
 
 export const CloseIcon = styled(Ionicons).attrs(({ theme }) => ({
-  size: 24,
+  size: 30,
   color: theme.COLORS.GREY_80,
 }))``;
+
+export const BottomSafeArea = styled(View)`
+  background-color: ${({ theme }) => theme.COLORS.WHITE};
+`;
  
