@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "iwork",
+    "slug": "iwork",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "jsEngine": "hermes",
+    "scheme": "iwork",
+    "plugins": ["expo-dev-client"],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Precisamos da sua localização para sugerir serviços próximos e preencher seu endereço automaticamente."
+      },
+      "config": {
+        "googleMapsApiKey": "AIzaSyBvU1p6LxPPU7d0_QN8SrLE1yKvP62Akyc"
+      },
+      "bundleIdentifier": "com.anonymous.iwork"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.iwork",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBvU1p6LxPPU7d0_QN8SrLE1yKvP62Akyc"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
