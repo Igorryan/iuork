@@ -6,7 +6,7 @@ import { ProfessionalCard } from '@components/ProfessionalCard';
 import { Feather } from '@expo/vector-icons';
 
 // types
-import { Professional as IProfessional } from '../../../types/domain';
+import { Professional as IProfessional } from '../../../../types/domain';
 
 // styles
 export const Container = styled(View)`
@@ -19,6 +19,7 @@ export const ProfessionalsList = styled(FlatList<IProfessional>)`
 
 export const ProfessionalCardCustom = styled(ProfessionalCard)`
   margin: 10px 20px 0;
+  height: 100px;
 `;
 
 export const StatusEndList = styled(Text)`

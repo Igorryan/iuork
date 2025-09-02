@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 
 // components
-import { Header } from '@components/Header';
+import { Header } from './Header';
 
 // api
 import { getAllProfessionals } from '@api/callbacks/professional';
 
 // types
-import { Professional as IProfessional } from '../../../types/domain';
+import { Professional as IProfessional } from '../../../../types/domain';
 
 // styles
 import * as S from './styles';
@@ -37,13 +37,7 @@ export const ProfessionalsVerticalList: React.FC = () => {
         data={data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <S.ProfessionalCardCustom
-            name={item.name}
-            image={item.image}
-            services={item.services}
-            rating={item.rating}
-            distance={item.distance}
-          />
+          <S.ProfessionalCardCustom professional={item} />
         )}
         showsVerticalScrollIndicator={false}
       />

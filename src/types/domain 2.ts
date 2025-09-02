@@ -32,7 +32,6 @@ export interface Service {
   professionalId: string;
   category: string;
   description: string;
-  pricingType?: 'FIXED' | 'HOURLY' | 'BUDGET';
   price: number | null;
   images: string[];
 }

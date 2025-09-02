@@ -114,7 +114,7 @@ export const ServiceDetail: React.FC = () => {
         </>
       )}
 
-      <Footer servicePrice={service?.price || 0} />
+      <Footer servicePrice={service?.price || 0} pricingType={service?.pricingType} />
     </S.Container>
   );
 };

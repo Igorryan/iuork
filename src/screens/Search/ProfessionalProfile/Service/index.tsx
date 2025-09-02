@@ -93,21 +93,20 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
 
       <S.ServiceDetailFooter>
         {service.price ? (
-          <Price priceValue={service.price} />
+          <Price
+            priceValue={service.price}
+            pricingType={service.pricingType === 'HOURLY' ? 'HOURLY' : undefined}
+          />
         ) : (
           <S.RequiredBudgetTextContainer>
             <S.RequiredBudgetText>Orçamento necessário</S.RequiredBudgetText>
           </S.RequiredBudgetTextContainer>
         )}
-        {service.price ? (
-          <S.ServiceButton>
-            <S.ServiceButtonText>Contratar</S.ServiceButtonText>
-          </S.ServiceButton>
-        ) : (
-          <S.ServiceButton>
-            <S.ServiceButtonText>Orçar</S.ServiceButtonText>
-          </S.ServiceButton>
-        )}
+        <S.ServiceButton>
+          <S.ServiceButtonText>
+            {service.pricingType === 'BUDGET' || !service.price ? 'Orçar' : 'Contratar'}
+          </S.ServiceButtonText>
+        </S.ServiceButton>
       </S.ServiceDetailFooter>
     </S.Container>
   );

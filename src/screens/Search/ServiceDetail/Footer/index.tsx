@@ -16,15 +16,16 @@ import { useNavigation } from '@react-navigation/native';
 
 type FooterProps = {
   servicePrice: number;
+  pricingType?: 'FIXED' | 'HOURLY' | 'BUDGET';
 };
 
-export const Footer: React.FC<FooterProps> = ({ servicePrice }) => {
+export const Footer: React.FC<FooterProps> = ({ servicePrice, pricingType }) => {
   // hooks
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   return (
     <S.Container>
       <S.Footer>
-        {servicePrice !== 0 && <Price style={{ marginRight: 30 }} priceValue={servicePrice} />}
+        {servicePrice !== 0 && <Price style={{ marginRight: 30 }} priceValue={servicePrice} pricingType={pricingType} />}
 
         {servicePrice ? (
           <Button>Contratar</Button>

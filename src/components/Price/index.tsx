@@ -11,9 +11,10 @@ import * as S from './styles';
 // types
 type PriceProps = ViewProps & {
   priceValue: number;
+  pricingType?: 'FIXED' | 'HOURLY' | 'BUDGET';
 };
 
-export const Price: React.FC<PriceProps> = ({ priceValue, ...rest }) => {
+export const Price: React.FC<PriceProps> = ({ priceValue, pricingType, ...rest }) => {
   // hooks
 
   // refs
@@ -33,7 +34,10 @@ export const Price: React.FC<PriceProps> = ({ priceValue, ...rest }) => {
         <S.ServicePriceTitle>Preço</S.ServicePriceTitle>
         <S.ValuePriceContainer>
           <S.ServicePriceSymbol>R$ </S.ServicePriceSymbol>
-          <S.ServicePriceValue>{priceValue}</S.ServicePriceValue>
+          <S.ServicePriceValue>
+            {priceValue}
+            {pricingType === 'HOURLY' ? ' / hora' : pricingType === 'FIXED' ? ' (fixo)' : ''}
+          </S.ServicePriceValue>
         </S.ValuePriceContainer>
       </S.ServicePriceContainer>
     </S.Container>
