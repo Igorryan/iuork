@@ -16,7 +16,7 @@ import { Map } from './Map';
 // types
 
 // types
-import { Professional as IProfessional } from '../../types/domain';
+import { Professional as IProfessional } from '../../../types/domain';
 import { getAllProfessionals } from '@api/callbacks/professional';
 import { useNavigation } from '@react-navigation/native';
 
@@ -31,7 +31,7 @@ export type ProfessionalFocusedProps =
   | undefined;
 
 // component
-export const Home: React.FC = () => {
+export const MapScreen: React.FC = () => {
   // hooks
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();

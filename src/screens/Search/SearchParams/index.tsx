@@ -17,6 +17,7 @@ import { What } from './What';
 import { IAddress } from 'src/types/address';
 import { setUserAddress, getUserAddress } from '@functions/getUserAddress';
 import { findPlaceFromLatLng } from '@functions/PlacesWithGoogleMaps';
+import { setLastSearch } from '@functions/searchStorage';
 
 // types
 
@@ -135,7 +136,8 @@ export const SearchParams: React.FC = () => {
   function navigate() {
     if (!address) return;
     setUserAddress(address);
-    navigation.navigate('Home');
+    setLastSearch({ address, keyword: keyword.trim() });
+    navigation.navigate('Tabs' as any, { screen: 'SearchTab' } as any);
   }
 
   function handleNavigate() {

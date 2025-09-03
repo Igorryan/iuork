@@ -1,19 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useAuth } from '@hooks/auth';
+import Login from '@screens/Auth/Login';
+import SignUp from '@screens/Auth/SignUp';
+import { TabRoutes } from './tab.routes';
 
 // Import das Telas na ordem solicitada
-import { Home } from '@screens/Search/Home';
+import { Home } from '@screens/Home';
+import { MapScreen } from '@screens/Search/Home';
 import { SearchParams } from '@screens/Search/SearchParams';
 import { ProfessionalsVerticalList } from '@screens/Search/Home/ProfessionalsVerticalList';
 import { ProfessionalProfile } from '@screens/Search/ProfessionalProfile';
 import { ServiceDetail } from '@screens/Search/ServiceDetail';
 import { ServicePhotoGallery } from '@screens/Search/ServicePhotoGallery';
 // import { Chat } from '@screens/Search/Chat';
-import { getUserAddress } from '@functions/getUserAddress';
 
 // Tipos das rotas
 export type RootStackParamList = {
-  Home: undefined;
+  Tabs: undefined;
+  Home: undefined; // kept for direct navigation if needed
+  Map: undefined;
+  Login: undefined;
+  SignUp: undefined;
   SearchParams: { openMinimized?: boolean } | undefined;
   ProfessionalsVerticalList: undefined;
   ProfessionalProfile: { professionalId: string };
@@ -33,14 +41,20 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 // Configuração das rotas
 const screens = [
+  // Home and Map will live inside Tabs; keep them registered if deep linking is needed
+  {
+    name: 'Home',
+    component: Home,
+    options: { headerShown: false },
+  },
   {
     name: 'SearchParams',
     component: SearchParams,
     options: { headerShown: false },
   },
   {
-    name: 'Home',
-    component: Home,
+    name: 'Map',
+    component: MapScreen,
     options: { headerShown: false },
   },
   {
@@ -72,40 +86,28 @@ const screens = [
 
 // Componente Principal
 export const StackRoutes: React.FC = () => {
-  const [isLoadingInitialRoute, setIsLoadingInitialRoute] = useState(true);
-  const [initialRouteName, setInitialRouteName] = useState<keyof RootStackParamList>('Home');
-
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        const address = await getUserAddress();
-        if (isMounted) {
-          setInitialRouteName(address ? 'Home' : 'SearchParams');
-        }
-      } finally {
-        if (isMounted) setIsLoadingInitialRoute(false);
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  if (isLoadingInitialRoute) {
-    return null;
-  }
+  const { isAuthenticated } = useAuth();
 
   return (
-    <Stack.Navigator initialRouteName={initialRouteName}>
-      {screens.map((screen) => (
-        <Stack.Screen
-          key={screen.name}
-          name={screen.name as keyof RootStackParamList}
-          component={screen.component}
-          options={screen.options}
-        />
-      ))}
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={isAuthenticated ? 'Tabs' : 'Login'}>
+      {isAuthenticated ? (
+        <>
+          <Stack.Screen name="Tabs" component={TabRoutes} />
+          {screens.map((screen) => (
+            <Stack.Screen
+              key={screen.name}
+              name={screen.name as keyof RootStackParamList}
+              component={screen.component}
+              options={screen.options}
+            />
+          ))}
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="SignUp" component={SignUp} />
+        </>
+      )}
     </Stack.Navigator>
   );
 };

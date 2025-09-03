@@ -90,7 +90,6 @@ export const ServiceCategoryProfession = styled(Text)`
   font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
   color: ${({ theme }) => theme.COLORS.WHITE};
   background-color: ${({ theme }) => theme.COLORS.GREY};
-
   border: 1px ${({ theme }) => theme.COLORS.GREY_60};
   padding: 4px 8px;
   border-radius: 100px;

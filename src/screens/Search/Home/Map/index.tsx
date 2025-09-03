@@ -14,7 +14,7 @@ import { ProfessionalMarker } from '../ProfessionalMarker';
 // types
 import { ProfessionalFocusedProps } from '..';
 import { Address, getUserAddress } from '@functions/getUserAddress';
-import { Professional as IProfessional } from '../../../types/domain';
+import { Professional as IProfessional } from '../../../../types/domain';
 
 type Props = {
   data: IProfessional[];
