@@ -12,9 +12,10 @@ type WhereProps = {
   address: IAddress | undefined;
   setAddress(address: IAddress): void;
   suggestedAddress?: IAddress | undefined;
+  onAddressSelected?(): void;
 };
 
-export const Where: React.FC<WhereProps> = ({ isActive, onPress, address, setAddress, suggestedAddress }) => {
+export const Where: React.FC<WhereProps> = ({ isActive, onPress, address, setAddress, suggestedAddress, onAddressSelected }) => {
   const [history, setHistory] = useState<IAddress[]>([]);
 
   const loadHistory = useCallback(async () => {
@@ -30,10 +31,12 @@ export const Where: React.FC<WhereProps> = ({ isActive, onPress, address, setAdd
     setAddress(a);
     await addAddressToHistory(a);
     loadHistory();
+    onAddressSelected && onAddressSelected();
   }
 
   function handleSelectHistoryItem(item: IAddress) {
     setAddress(item);
+    onAddressSelected && onAddressSelected();
   }
 
   async function handleSelectSuggestedAddress() {
@@ -41,6 +44,15 @@ export const Where: React.FC<WhereProps> = ({ isActive, onPress, address, setAdd
     setAddress(suggestedAddress);
     await addAddressToHistory(suggestedAddress);
     loadHistory();
+    onAddressSelected && onAddressSelected();
+  }
+
+  function formatStreetLine(a?: IAddress) {
+    if (!a) return 'Para onde?';
+    const num = Number(a.number || 0);
+    const numText = num > 0 ? String(num) : 's/n';
+    const street = a.street || '';
+    return street ? `${street}, ${numText}` : `${numText}`;
   }
 
   return (
@@ -49,7 +61,7 @@ export const Where: React.FC<WhereProps> = ({ isActive, onPress, address, setAdd
       onPress={onPress}
       minimized={{
         title: 'Endereço',
-        value: `${address ? `${address.street}` : 'Para onde?'}`,
+        value: formatStreetLine(address),
       }}
       maximized={{
         title: 'Para onde?',

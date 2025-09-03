@@ -7,16 +7,15 @@ import * as S from './styles';
 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@routes/stack.routes';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 
 // components
 import { Footer } from './Footer';
 import { Where } from './Where';
 import { What } from './What';
-import { When } from './When';
 import { IAddress } from 'src/types/address';
-import { setUserAddress } from '@functions/getUserAddress';
+import { setUserAddress, getUserAddress } from '@functions/getUserAddress';
 import { findPlaceFromLatLng } from '@functions/PlacesWithGoogleMaps';
 
 // types
@@ -24,23 +23,48 @@ import { findPlaceFromLatLng } from '@functions/PlacesWithGoogleMaps';
 export const SearchParams: React.FC = () => {
   // hooks
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const route = useRoute();
   const { goBack } = useNavigation();
 
   // states
   const [addressViewFocused, setAddressViewFocused] = useState(true);
   const [whatViewFocused, setWhatViewFocused] = useState(false);
-  const [whenViewFocused, setWhenViewFocused] = useState(false);
   const [address, setAddress] = useState<IAddress>();
   const [suggestedAddress, setSuggestedAddress] = useState<IAddress>();
   const [keyword, setKeyword] = useState('');
-  const [date, setDate] = useState<Date | null>(null);
 
   // effects
   useEffect(() => {
-    if (address) {
+    let isMounted = true;
+    (async () => {
+      try {
+        const saved = await getUserAddress();
+        if (isMounted && saved) setAddress(saved);
+      } catch {}
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // if opened from Home with openMinimized, keep both minimized
+    const params = (route as any)?.params as { openMinimized?: boolean } | undefined;
+    if (params?.openMinimized) {
       setAddressViewFocused(false);
+      setWhatViewFocused(false);
     }
-  }, [address]);
+  }, [route]);
+
+  useEffect(() => {
+    if (address) {
+      const params = (route as any)?.params as { openMinimized?: boolean } | undefined;
+      if (!params?.openMinimized) {
+        setAddressViewFocused(false);
+        setWhatViewFocused(true);
+      }
+    }
+  }, [address, route]);
 
   useEffect(() => {
     let isMounted = true;
@@ -90,26 +114,22 @@ export const SearchParams: React.FC = () => {
   function handleOpenAddressView() {
     setAddressViewFocused(true);
     setWhatViewFocused(false);
-    setWhenViewFocused(false);
   }
 
   function handleOpenWhatView() {
     setAddressViewFocused(false);
     setWhatViewFocused(true);
-    setWhenViewFocused(false);
   }
 
-  function handleOpenWhenView() {
+  function handleAddressSelected() {
     setAddressViewFocused(false);
-    setWhatViewFocused(false);
-    setWhenViewFocused(true);
+    setWhatViewFocused(true);
   }
 
   function clearAll() {
     handleOpenAddressView();
     setAddress(undefined);
     setKeyword('');
-    setDate(null);
   }
 
   function navigate() {
@@ -145,6 +165,7 @@ export const SearchParams: React.FC = () => {
             setAddress={setAddress}
             onPress={handleOpenAddressView}
             suggestedAddress={suggestedAddress}
+            onAddressSelected={handleAddressSelected}
           />
 
           <What
@@ -152,13 +173,6 @@ export const SearchParams: React.FC = () => {
             value={keyword}
             setValue={setKeyword}
             onPress={handleOpenWhatView}
-          />
-
-          <When
-            isActive={whenViewFocused}
-            date={date}
-            setDate={setDate}
-            onPress={handleOpenWhenView}
           />
         </S.ContentView>
 

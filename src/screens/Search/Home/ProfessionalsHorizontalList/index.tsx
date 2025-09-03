@@ -22,7 +22,7 @@ type Props = {
 
 // consts
 const { width } = Dimensions.get('window');
-const cardWidth = Number((width * 0.8).toFixed(0));
+const baseCardWidth = Number((width * 0.8).toFixed(0));
 
 // component
 export const ProfessionalsHorizontalList: React.FC<Props> = ({
@@ -54,26 +54,31 @@ export const ProfessionalsHorizontalList: React.FC<Props> = ({
     navigation.navigate('ProfessionalProfile', { professionalId });
   }, []);
 
+  // computed
+  const isSingle = data.length === 1;
+  // account for horizontal padding of 10 on both sides when single
+  const computedCardWidth = isSingle ? width - 20 : baseCardWidth;
+
   useEffect(() => {
     if (!professionalFocused?.id) return;
 
     const professionalFocusedIndex = data.findIndex((p) => p.id === professionalFocused.id);
 
     scrollViewRef.current?.scrollTo({
-      x: professionalFocusedIndex * cardWidth,
+      x: professionalFocusedIndex * computedCardWidth,
     });
-  }, [data, professionalFocused]);
+  }, [data, professionalFocused, computedCardWidth]);
 
   useEffect(() => {
     if (!data || data.length === 0) return;
-    const professionalIndex = Math.ceil(position / cardWidth);
+    const professionalIndex = Math.ceil(position / computedCardWidth);
     const professional = data[professionalIndex];
     if (!professional || !professional.address) return;
     setProfessionalFocused({
       id: professional.id,
       location: professional.address,
     });
-  }, [data, position, setProfessionalFocused]);
+  }, [data, position, setProfessionalFocused, computedCardWidth]);
 
   // renders
   return (
@@ -88,19 +93,20 @@ export const ProfessionalsHorizontalList: React.FC<Props> = ({
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
         snapToAlignment="start"
-        snapToInterval={cardWidth}
+        snapToInterval={isSingle ? undefined : computedCardWidth}
         onMomentumScrollEnd={(e) => {
           setPosition(Number(e.nativeEvent.contentOffset.x.toFixed(0)));
         }}
         scrollEventThrottle={0}
         contentContainerStyle={{
-          paddingRight: 10,
+          paddingRight: isSingle ? 0 : 10,
         }}
       >
         {data.map((professional) => (
           <ProfessionalCard
             style={{
-              width: cardWidth - (data.length === 1 ? 40 : 10),
+              width: computedCardWidth,
+              marginRight: isSingle ? 0 : 10,
             }}
             onPress={() => handleOpenProfessionalProfile(professional.id)}
             activeOpacity={0.9}

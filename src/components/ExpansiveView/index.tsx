@@ -6,7 +6,7 @@ type ExpansiveViewProps = {
   onPress(): void;
   minimized: {
     title: string;
-    value: string;
+    value: React.ReactNode;
   };
   maximized: {
     title: string;
@@ -24,7 +24,13 @@ export const ExpansiveView: React.FC<ExpansiveViewProps> = ({
     <S.ExpansiveView isActive={isActive}>
       <S.BlockMinimized onPress={onPress} isActive={!isActive}>
         <S.BlockMinimizedTitle>{minimized.title}</S.BlockMinimizedTitle>
-        <S.BlockMinimizedValue>{minimized.value}</S.BlockMinimizedValue>
+        <S.BlockMinimizedValue>
+          {typeof minimized.value === 'string' ? (
+            <S.BlockMinimizedText>{minimized.value}</S.BlockMinimizedText>
+          ) : (
+            minimized.value
+          )}
+        </S.BlockMinimizedValue>
       </S.BlockMinimized>
 
       <S.BlockMaximized isActive={isActive}>

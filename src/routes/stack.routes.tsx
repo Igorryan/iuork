@@ -14,7 +14,7 @@ import { getUserAddress } from '@functions/getUserAddress';
 // Tipos das rotas
 export type RootStackParamList = {
   Home: undefined;
-  SearchParams: undefined;
+  SearchParams: { openMinimized?: boolean } | undefined;
   ProfessionalsVerticalList: undefined;
   ProfessionalProfile: { professionalId: string };
   ServiceDetail: {

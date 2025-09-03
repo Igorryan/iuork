@@ -25,8 +25,17 @@ export const Header: React.FC = () => {
 
   // callbacks
 
-  function handleEditParamsNavigate() {
-    navigation.navigate('SearchParams');
+  async function handleEditParamsNavigate() {
+    try {
+      const saved = await getUserAddress();
+      if (saved?.street) {
+        navigation.navigate('SearchParams', { openMinimized: true });
+      } else {
+        navigation.navigate('SearchParams');
+      }
+    } catch {
+      navigation.navigate('SearchParams');
+    }
   }
 
   // effects

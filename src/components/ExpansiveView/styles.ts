@@ -56,6 +56,12 @@ export const BlockMinimizedValue = styled(Text)`
   font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
 `;
 
+export const BlockMinimizedText = styled(Text)`
+  color: ${({ theme }) => theme.COLORS.GREY};
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
+`;
+
 export const BlockMaximized = styled(View)<IBlockProps>`
   padding: 20px 24px 24px;
 
