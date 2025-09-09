@@ -2,6 +2,8 @@
 import * as S from './styles';
 
 // libs
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from 'styled-components/native';
 
 // application
 
@@ -13,22 +15,18 @@ type DetailsProps = {
   avatar: string;
   ordersCount: number;
   ratingsAvg: number;
-  ratingsCount: number;
   name: string;
   profession: string;
-  description: string;
 };
 
 export const Details: React.FC<DetailsProps> = ({
   avatar,
-  ordersCount,
   ratingsAvg,
-  ratingsCount,
   name,
   profession,
-  description,
 }) => {
   // hooks
+  const { COLORS } = useTheme();
 
   // refs
 
@@ -43,38 +41,29 @@ export const Details: React.FC<DetailsProps> = ({
   // renders
   return (
     <S.Container>
-      <S.StatusContainer>
-        <S.UserAvatar
-          source={{
-            uri: avatar,
-          }}
-        />
+      <S.ProfileMainContainer>
+        <S.ProfileInfoContainer>
+          <S.TopInfoContainer>
+            <S.RatingContainer>
+              <MaterialCommunityIcons name="star" size={16} color="#FFD700" />
+              <S.RatingText>{ratingsAvg}</S.RatingText>
+            </S.RatingContainer>
+          </S.TopInfoContainer>
+          <S.UserName>{name}</S.UserName>
+          <S.ProfessionText>{profession}</S.ProfessionText>
+          <S.ButtonMessage style={{ borderRadius: 24 }}>
+            <S.ButtonMessageText>Message</S.ButtonMessageText>
+          </S.ButtonMessage>
 
-        <S.StatusDetailsContainer>
-          <S.StatusContentBlock>
-            <S.StatusValue>{ordersCount}</S.StatusValue>
-            <S.StatusDescription>Jobs</S.StatusDescription>
-          </S.StatusContentBlock>
-
-          <S.StatusContentBlock>
-            <S.StatusValue>
-              {ratingsAvg} ({ratingsCount})
-            </S.StatusValue>
-            <S.StatusDescription>Avaliação</S.StatusDescription>
-          </S.StatusContentBlock>
-
-          <S.StatusContentBlock>
-            <S.StatusValue>15m</S.StatusValue>
-            <S.StatusDescription>Responde</S.StatusDescription>
-          </S.StatusContentBlock>
-        </S.StatusDetailsContainer>
-      </S.StatusContainer>
-
-      <S.DescriptionContainer>
-        <S.UserName>{name}</S.UserName>
-        {!!profession && <S.ServiceCategoryProfession>{profession}</S.ServiceCategoryProfession>}
-        <S.UserDescription>{description}</S.UserDescription>
-      </S.DescriptionContainer>
+        </S.ProfileInfoContainer>
+        <S.ProfileImageContainer>
+          <S.UserAvatar
+            source={{
+              uri: avatar,
+            }}
+          />
+        </S.ProfileImageContainer>
+      </S.ProfileMainContainer>
     </S.Container>
   );
 };

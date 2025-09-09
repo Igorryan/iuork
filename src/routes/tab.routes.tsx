@@ -6,6 +6,7 @@ import theme from '@theme/index';
 import { MapScreen } from '@screens/Search/Home';
 import { useRef, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getLastSearch, clearLastSearch } from '@functions/searchStorage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Home } from '@screens/Home';
@@ -44,6 +45,8 @@ const SearchTabEntry: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
 export const TabRoutes: React.FC = () => {
   const lastPressRef = useRef<number>(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, 6);
 
   return (
     <Tab.Navigator
@@ -54,8 +57,8 @@ export const TabRoutes: React.FC = () => {
         tabBarStyle: {
           backgroundColor: theme.COLORS.WHITE,
           borderTopColor: 'transparent',
-          height: 64,
-          paddingBottom: 6,
+          height: 64 + insets.bottom,
+          paddingBottom: bottomPadding,
           paddingTop: 6,
         },
         tabBarLabelStyle: { fontSize: 12, marginBottom: 4 },

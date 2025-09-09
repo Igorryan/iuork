@@ -12,13 +12,24 @@ export const Header = styled(View)`
   align-items: center;
   justify-content: space-between;
 
+  background-color: transparent;
   padding: 0 20px;
+`;
 
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.COLORS.GREY_20}80;
+export const BackContainer = styled(TouchableOpacity)`
+  align-items: center;
+  justify-content: center;
 
+  width: 48px;
+  height: 48px;
+
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.COLORS.GREY_20};
+
+  border-radius: 100px;
   background-color: ${({ theme }) => theme.COLORS.WHITE};
 `;
+
 
 export const ButtonContainer = styled(TouchableOpacity)`
   align-items: center;
@@ -35,7 +46,6 @@ export const OptionsContainer = styled(View)`
 
 export const IconClose = styled(Feather)`
   color: ${({ theme }) => theme.COLORS.GREY};
-  margin-left: -24px;
 `;
 
 export const Icon = styled(Feather)`

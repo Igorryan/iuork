@@ -36,7 +36,7 @@ export const ProfessionalProfile: React.FC = () => {
   const [professional, setProfessional] = useState<IProfessional>();
   const [services, setServices] = useState<IService[]>([]);
   const [reviews, setReviews] = useState<IReview[]>([]);
-  const [optionsMenuContext, setOptionsMenuContext] = useState(['Serviços', 'Avaliações']);
+  const [optionsMenuContext, setOptionsMenuContext] = useState(['Serviços', 'Sobre']);
   const [optionMenuContextSelected, setOptionMenuContextSelected] = useState(optionsMenuContext[0]);
 
   // variables
@@ -76,10 +76,46 @@ export const ProfessionalProfile: React.FC = () => {
   // renders
   return (
     <S.Container>
-      <S.Content>
+      <S.HeaderContainer>
+        <S.Content>
+          <Header icon="arrow-left" />
+          {professional && (
+            <Details
+              avatar={professional.image}
+              ordersCount={professional.completedServicesCount}
+              ratingsAvg={professional.ratingsAggregate.avg}
+              name={professional.name}
+              profession={professional.profession}
+            />
+          )}
+        </S.Content>
+      </S.HeaderContainer>
+
+
+      <S.StatsContainer>
+        <S.BlurBackground intensity={60} tint="light">
+          <S.StatsContent>
+            <S.StatItem>
+              <S.StatValue>{12} years</S.StatValue>
+              <S.StatLabel>Experience</S.StatLabel>
+            </S.StatItem>
+
+            <S.StatItem>
+              <S.StatValue>{1243}+</S.StatValue>
+              <S.StatLabel>Patients</S.StatLabel>
+            </S.StatItem>
+
+            <S.StatItem>
+              <S.StatValue>{12}</S.StatValue>
+              <S.StatLabel>Operations</S.StatLabel>
+            </S.StatItem>
+          </S.StatsContent>
+        </S.BlurBackground>
+      </S.StatsContainer>
+      {/* <S.Content>
         {professional && (
           <>
-            <Header />
+            <Header icon="arrow-left" />
 
             <S.ScrollViewContainer showsVerticalScrollIndicator={false}>
               <Details
@@ -126,7 +162,7 @@ export const ProfessionalProfile: React.FC = () => {
             </S.ScrollViewContainer>
           </>
         )}
-      </S.Content>
+      </S.Content> */}
     </S.Container>
   );
 };

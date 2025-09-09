@@ -33,9 +33,9 @@ export const Header: React.FC<HeaderProps> = ({ icon = 'x' }) => {
   // renders
   return (
     <S.Header>
-      <S.ButtonContainer onPress={() => navigation.goBack()}>
-        <S.IconClose name={icon} size={24} />
-      </S.ButtonContainer>
+      <S.BackContainer onPress={() => navigation.goBack()}>
+        <S.IconClose name={icon} size={20} />
+      </S.BackContainer>
 
       <S.OptionsContainer>
         <S.ButtonContainer>
