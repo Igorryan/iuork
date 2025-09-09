@@ -3,7 +3,6 @@ import * as S from './styles';
 
 // libs
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from 'styled-components/native';
 
 // application
 
@@ -26,7 +25,6 @@ export const Details: React.FC<DetailsProps> = ({
   profession,
 }) => {
   // hooks
-  const { COLORS } = useTheme();
 
   // refs
 
@@ -40,7 +38,7 @@ export const Details: React.FC<DetailsProps> = ({
 
   // renders
   return (
-    <S.Container>
+    <S.Container colors={['#EDEDED', '#F8F8F8']}>
       <S.ProfileMainContainer>
         <S.ProfileInfoContainer>
           <S.TopInfoContainer>

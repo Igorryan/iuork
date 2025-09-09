@@ -1,13 +1,17 @@
 import { View, Image, Text, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // libs
 
 // types
 
 // styles
-export const Container = styled(View)`
-  background-color: #F8F9FA;
+export const Container = styled(LinearGradient).attrs({
+  colors: ['#EDEDED', '#F8F8F8'],
+  start: { x: 0, y: 0 },
+  end: { x: 0, y: 1 },
+})`
   padding: 0px 20px 20px;
   border-bottom-left-radius: 24px;
   border-bottom-right-radius: 24px;
@@ -30,7 +34,7 @@ export const TopInfoContainer = styled(View)`
   flex-direction: row;
   justify-content: space-between;
   z-index: 1;
-  margin-bottom: 16px;
+  margin-bottom: 26px;
   gap: 8px;
 `;
 
@@ -71,7 +75,7 @@ export const UserAvatar = styled(Image)`
 
 export const UserName = styled(Text)`
   font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
-  font-size: ${({ theme }) => theme.FONT_SIZE.XL}px;
+  font-size: ${({ theme }) => theme.FONT_SIZE.LGG}px;
   color: ${({ theme }) => theme.COLORS.GREY};
   text-align: left;
 `;

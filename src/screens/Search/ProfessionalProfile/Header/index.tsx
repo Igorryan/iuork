@@ -44,9 +44,6 @@ export const Header: React.FC<HeaderProps> = ({ icon = 'x' }) => {
         <S.ButtonContainer>
           <S.Icon name="heart" size={22} />
         </S.ButtonContainer>
-        <S.ButtonContainer>
-          <S.Icon name="message-square" size={22} />
-        </S.ButtonContainer>
       </S.OptionsContainer>
     </S.Header>
   );

@@ -1,4 +1,4 @@
-import { SafeAreaView, View, ScrollView, Platform, Text } from 'react-native';
+import { SafeAreaView, View, ScrollView, Platform, Text, TouchableOpacity, Animated } from 'react-native';
 import styled from 'styled-components/native';
 import { BlurView } from 'expo-blur';
 
@@ -7,17 +7,16 @@ import { BlurView } from 'expo-blur';
 // types
 
 // styles
-export const Container = styled(View)`
+export const Container = styled(ScrollView)`
   flex: 1;
   padding-top: ${Platform.OS === 'android' ? 35 : 0}px;
   background-color: ${({ theme }) => theme.COLORS.WHITE};
-
 `;
 
 
 export const Content = styled(SafeAreaView)`
   flex: 1;
-  background-color: ${({ theme }) => theme.COLORS.GREY_10};
+  background-color: #EDEDED;
 `;
 
 export const HeaderContainer = styled(View)`
@@ -89,4 +88,51 @@ export const StatLabel = styled(Text)`
   margin-top: 4px;
   text-align: left;
   width: 100%;
+`;
+
+// Tab Separator Styles
+export const TabSeparatorContainer = styled(View)`
+  padding: 0 20px;
+  margin-top: 12px;
+  margin-bottom: 20px;
+`;
+
+export const TabContainer = styled(View)`
+  height: 60px;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+`;
+
+export const TabBackground = styled(View)`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: ${({ theme }) => theme.COLORS.GREY_20};
+`;
+
+export const TabSlider = styled(Animated.View)`
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  background-color: ${({ theme }) => theme.COLORS.BLACK};
+  z-index: 1;
+`;
+
+export const TabButton = styled(TouchableOpacity)`
+  flex: 1;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const TabText = styled(Text)<{ isActive: boolean }>`
+  font-family: ${({ theme, isActive }) => 
+    isActive ? theme.FONT_FAMILY.MEDIUM : theme.FONT_FAMILY.REGULAR};
+  font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
+  color: ${({ theme, isActive }) => 
+    isActive ? theme.COLORS.GREY : theme.COLORS.GREY_60};
+  text-align: center;
 `;

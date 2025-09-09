@@ -25,7 +25,7 @@ export const SelectedContainer = styled(Animated.View)`
   height: 30px;
   width: 50%;
 
-  background-color: ${({ theme }) => theme.COLORS.WHITE};
+  background-color: ${({ theme }) => theme.COLORS.BLACK};
 
   border-radius: 100px;
 `;
@@ -46,7 +46,7 @@ export const OptionText = styled(Text)<IOptionTextProps>`
   ${(props) =>
     props.isActive &&
     css`
-      color: ${({ theme }) => theme.COLORS.BLACK};
+      color: ${({ theme }) => theme.COLORS.WHITE};
       font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
     `}
 `;
