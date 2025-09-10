@@ -11,12 +11,8 @@ import { RootStackParamList } from '@routes/stack.routes';
 
 // application
 
-// consts
-const LIMIT_PHOTO_PREVIEW = 3;
-
 // types
-import { Price } from '@components/Price';
-import { Service as IService } from '../../../types/domain';
+import { Service as IService } from '../../../../types/domain';
 import StarRating from '@components/StarRating';
 
 interface IProps {
@@ -55,59 +51,58 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
         })
       }
     >
-      <S.ServiceHeader>
-        <S.ServiceTitle>{service.name}</S.ServiceTitle>
-
-        <S.ServiceImagesContainer>
-          {service.images.map(
-            (image, i) =>
-              i < LIMIT_PHOTO_PREVIEW && (
-                <S.ServiceImage
-                  key={image}
-                  source={{
-                    uri: image,
-                  }}
-                />
-              ),
-          )}
-          {service.images.length - LIMIT_PHOTO_PREVIEW > 0 && (
-            <S.MorePhotosContainer>
-              <S.MorePhotos>+{service.images.length - (LIMIT_PHOTO_PREVIEW - 1)}</S.MorePhotos>
-            </S.MorePhotosContainer>
-          )}
-        </S.ServiceImagesContainer>
-      </S.ServiceHeader>
-
-      <S.ServiceDescription>{service.description}</S.ServiceDescription>
-
-      <S.ServiceDetails>
-        <S.ServiceDetailItem>
-          <StarRating rating={4.5} />
-          <S.ServiceDetailDescription>4.5 (48 avaliações)</S.ServiceDetailDescription>
-        </S.ServiceDetailItem>
-        <S.ServiceDetailItem>
-          <MaterialCommunityIcons name="clock-outline" size={16} color={COLORS.GREY_60} />
-          <S.ServiceDetailDescription>30 minutos</S.ServiceDetailDescription>
-        </S.ServiceDetailItem>
-      </S.ServiceDetails>
-
-      <S.ServiceDetailFooter>
-        {service.price ? (
-          <Price
-            priceValue={service.price}
-            pricingType={service.pricingType === 'HOURLY' ? 'HOURLY' : undefined}
-          />
+      <S.CardContent>
+        {service.images?.[0] ? (
+          <S.ThumbWrapper>
+            <S.Thumbnail
+              source={{
+                uri: service.images[0],
+              }}
+            />
+            {service.images.length > 1 && (
+              <S.ThumbOverlay>
+                <S.Row>
+                  <S.ThumbOverlayIcon name="image" size={12} />
+                  <S.ThumbOverlayText>+{service.images.length - 1}</S.ThumbOverlayText>
+                </S.Row>
+              </S.ThumbOverlay>
+            )}
+          </S.ThumbWrapper>
         ) : (
-          <S.RequiredBudgetTextContainer>
-            <S.RequiredBudgetText>Orçamento necessário</S.RequiredBudgetText>
-          </S.RequiredBudgetTextContainer>
+          <S.PlaceholderThumb />
         )}
-        <S.ServiceButton>
-          <S.ServiceButtonText>
-            {service.pricingType === 'BUDGET' || !service.price ? 'Orçar' : 'Contratar'}
-          </S.ServiceButtonText>
-        </S.ServiceButton>
-      </S.ServiceDetailFooter>
+
+        <S.ContentColumn>
+          <S.ServiceTitle numberOfLines={2}>{service.name}</S.ServiceTitle>
+          <S.MetaRow>
+            <StarRating rating={4.5} size={12} />
+            <S.MetaText>4.5 (48)</S.MetaText>
+            <S.Dot />
+            <MaterialCommunityIcons name="clock-outline" size={12} color={COLORS.GREY_60} />
+            <S.MetaText>30 min</S.MetaText>
+          </S.MetaRow>
+          {!!service.description && (
+            <S.ServiceDescription numberOfLines={2}>
+              {service.description}
+            </S.ServiceDescription>
+          )}
+        </S.ContentColumn>
+
+        <S.RightColumn>
+          {service.price ? (
+            <S.PricePill>
+              <S.PriceText>
+                R$ {service.price}
+                {service.pricingType === 'HOURLY' ? '/h' : ''}
+              </S.PriceText>
+            </S.PricePill>
+          ) : (
+            <S.BudgetBadge>
+              <S.BudgetBadgeText>Orçar</S.BudgetBadgeText>
+            </S.BudgetBadge>
+          )}
+        </S.RightColumn>
+      </S.CardContent>
     </S.Container>
   );
 };

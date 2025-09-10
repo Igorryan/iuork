@@ -36,7 +36,7 @@ export const HeaderOptionsContainer = styled(View)`
 `;
 
 export const ServiceContainer = styled(View)`
-  padding: 20px 20px 80px;
+  padding: 0px 8px 80px;
 
   flex: 1;
 `;
@@ -63,21 +63,23 @@ export const BlurBackground = styled(BlurView)`
 
 export const StatsContent = styled(View)`
   flex-direction: row;
-  justify-content: space-around;
-  padding: 24px;
-  background-color: rgba(160, 160, 160, 0.1);
+  justify-content: space-between;
+  padding: 20px 16px;
+  background-color: rgba(255, 255, 255, 0.7);
   border-radius: 16px;
+  border: 1px solid ${({ theme }) => theme.COLORS.GREY_20}33;
 `;
 
 export const StatItem = styled(View)`
   align-items: center;
+  min-width: 90px;
 `;
 
 export const StatValue = styled(Text)`
   font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
   font-size: ${({ theme }) => theme.FONT_SIZE.LG}px;
   color: ${({ theme }) => theme.COLORS.GREY};
-  text-align: left;
+  text-align: center;
   width: 100%;
 `;
 
@@ -86,53 +88,14 @@ export const StatLabel = styled(Text)`
   font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
   color: ${({ theme }) => theme.COLORS.GREY_60};
   margin-top: 4px;
-  text-align: left;
+  text-align: center;
   width: 100%;
 `;
 
 // Tab Separator Styles
 export const TabSeparatorContainer = styled(View)`
   padding: 0 20px;
-  margin-top: 12px;
+  margin-top: 28px;
   margin-bottom: 20px;
 `;
 
-export const TabContainer = styled(View)`
-  height: 60px;
-  flex-direction: row;
-  align-items: center;
-  position: relative;
-`;
-
-export const TabBackground = styled(View)`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-color: ${({ theme }) => theme.COLORS.GREY_20};
-`;
-
-export const TabSlider = styled(Animated.View)`
-  position: absolute;
-  bottom: 0;
-  height: 3px;
-  background-color: ${({ theme }) => theme.COLORS.BLACK};
-  z-index: 1;
-`;
-
-export const TabButton = styled(TouchableOpacity)`
-  flex: 1;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-`;
-
-export const TabText = styled(Text)<{ isActive: boolean }>`
-  font-family: ${({ theme, isActive }) => 
-    isActive ? theme.FONT_FAMILY.MEDIUM : theme.FONT_FAMILY.REGULAR};
-  font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
-  color: ${({ theme, isActive }) => 
-    isActive ? theme.COLORS.GREY : theme.COLORS.GREY_60};
-  text-align: center;
-`;

@@ -44,7 +44,7 @@ export const Details: React.FC<DetailsProps> = ({
           <S.TopInfoContainer>
             <S.RatingContainer>
               <MaterialCommunityIcons name="star" size={16} color="#FFD700" />
-              <S.RatingText>{ratingsAvg}</S.RatingText>
+              <S.RatingText>{4.8}</S.RatingText>
             </S.RatingContainer>
           </S.TopInfoContainer>
           <S.UserName>{name}</S.UserName>

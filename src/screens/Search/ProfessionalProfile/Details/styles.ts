@@ -71,6 +71,9 @@ export const ProfileImageContainer = styled(View)`
 export const UserAvatar = styled(Image)`
   width: 220px;
   height: 280px;
+
+border-top-left-radius: 24px;
+border-top-right-radius: 24px;
 `;
 
 export const UserName = styled(Text)`

@@ -6,38 +6,59 @@ export const Container = styled(TouchableOpacity)`
   background: ${({ theme }) => theme.COLORS.WHITE};
 
   border-radius: 14px;
-
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-
-  margin-bottom: 16px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom-width: 1px;
+  border-bottom-color: ${({ theme }) => theme.COLORS.GREY_20};
 `;
 
-export const ServiceHeader = styled(View)`
+export const Row = styled(View)`
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-
-  padding: 20px 20px 16px 20px;
 `;
 
-export const ServiceDescription = styled(Text)`
-  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
-  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
-  color: ${({ theme }) => theme.COLORS.GREY_60};
+export const CardContent = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  padding: 16px 16px;
+`;
 
-  text-align: justify;
+export const Thumbnail = styled(Image)`
+  width: 68px;
+  height: 68px;
+  border-radius: 12px;
+  background-color: ${({ theme }) => theme.COLORS.GREY_10};
+`;
 
-  padding: 0 20px 16px 20px;
+export const ContentColumn = styled(View)`
+  flex: 1;
+  margin-left: 14px;
 `;
 
 export const ServiceTitle = styled(Text)`
   font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
-  font-size: ${({ theme }) => theme.FONT_SIZE.LG}px;
+  font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
   color: ${({ theme }) => theme.COLORS.GREY};
-  line-height: 24px;
+  line-height: 22px;
+`;
 
-  flex: 1;
-  margin-right: 20px;
+export const MetaRow = styled(Row)`
+  margin-top: 8px;
+`;
+
+export const ServiceDescription = styled(Text)`
+  margin-top: 8px;
+  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_60};
+  line-height: 18px;
+`;
+
+export const MetaText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_60};
+  margin-left: 6px;
 `;
 
 export const ServiceImagesContainer = styled(View)`
@@ -75,16 +96,10 @@ export const MorePhotos = styled(Text)`
   color: ${({ theme }) => theme.COLORS.WHITE};
 `;
 
-export const ServiceDetails = styled(View)`
-  padding: 20px;
-
-  gap: 10px;
-
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.COLORS.GREY_20}80;
-
-  border-top-width: 1px;
-  border-top-color: ${({ theme }) => theme.COLORS.GREY_20}80;
+export const PricePill = styled(View)`
+  padding: 6px 10px;
+  background-color: ${({ theme }) => theme.COLORS.SECONDARY}20;
+  border-radius: 999px;
 `;
 
 export const ServiceDetailItem = styled(View)`
@@ -92,59 +107,82 @@ export const ServiceDetailItem = styled(View)`
   align-items: center;
 `;
 
-export const ServiceDetailDescription = styled(Text)`
-  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
-  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
-  color: ${({ theme }) => theme.COLORS.GREY_60};
-
-  margin-left: 8px;
-`;
-
-export const CarouselContainer = styled(View)`
-  padding: 20px 20px 0;
-`;
-
-export const ServiceDetailFooter = styled(View)`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 20px;
-`;
-
-export const RequiredBudgetTextContainer = styled(View)`
-  border-top-left-radius: 100px;
-  border-bottom-left-radius: 100px;
-
-  border-radius: 2px;
-`;
-
-export const RequiredBudgetText = styled(Text)`
-  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
-  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
-`;
-
-export const ServiceButton = styled(View)`
-  align-items: center;
-  justify-content: center;
-  margin-left: 30px;
-
-  height: 50px;
-
-  width: max-content;
-  min-width: 140px;
-
-  border: 1px solid ${({ theme }) => theme.COLORS.SECONDARY};
-  border-radius: 100px;
-`;
-
-export const ServiceButtonText = styled(Text)`
+export const PriceText = styled(Text)`
   font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
-  font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
   color: ${({ theme }) => theme.COLORS.SECONDARY};
 `;
 
-export const ServiceButtonIcon = styled(Feather)`
+export const RightColumn = styled(View)`
+  align-items: flex-end;
+  margin-left: 12px;
+`;
+
+export const Chevron = styled(Feather).attrs({ name: 'chevron-right' })`
+  color: ${({ theme }) => theme.COLORS.GREY_40};
+`;
+
+export const PlaceholderThumb = styled(View)`
+  width: 68px;
+  height: 68px;
+  border-radius: 12px;
+  background-color: ${({ theme }) => theme.COLORS.GREY_10};
+`;
+
+export const ThumbOverlay = styled(View)`
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  background-color: ${({ theme }) => theme.COLORS.WHITE};
+  border-radius: 12px;
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.COLORS.SECONDARY};
+  align-items: center;
+  justify-content: center;
+  shadow-color: #000;
+  shadow-offset: 0px 1px;
+  shadow-opacity: 0.15;
+  shadow-radius: 2px;
+  elevation: 2;
+`;
+
+export const ThumbOverlayText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
+  color: ${({ theme }) => theme.COLORS.SECONDARY};
+`;
+
+export const ThumbOverlayIcon = styled(Feather).attrs({ name: 'image' })`
+  color: ${({ theme }) => theme.COLORS.SECONDARY};
+  margin-right: 4px;
+`;
+
+export const ThumbWrapper = styled(View)`
+  position: relative;
+  width: 68px;
+  height: 68px;
+`;
+
+export const Dot = styled(View)`
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: ${({ theme }) => theme.COLORS.GREY_20};
+  margin: 0 6px;
+`;
+
+export const Trailing = styled(Row)``;
+
+export const BudgetBadge = styled(View)`
+  padding: 6px 10px;
+  border: 1px solid ${({ theme }) => theme.COLORS.SECONDARY};
+  border-radius: 999px;
+`;
+
+export const BudgetBadgeText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
   color: ${({ theme }) => theme.COLORS.SECONDARY};
 `;
 

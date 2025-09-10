@@ -23,6 +23,7 @@ import { Header } from './Header';
 import { Details } from './Details';
 import { Professional as IProfessional, Service as IService, Review as IReview } from '../../../types/domain';
 import { RootStackParamList } from '@routes/stack.routes';
+import { ContextSwitcher } from '@components/ContextSwitcher';
 
 type ScreenRoute = RouteProp<RootStackParamList, 'ProfessionalProfile'>;
 
@@ -36,7 +37,7 @@ export const ProfessionalProfile: React.FC = () => {
   const [professional, setProfessional] = useState<IProfessional>();
   const [services, setServices] = useState<IService[]>([]);
   const [reviews, setReviews] = useState<IReview[]>([]);
-  const [optionsMenuContext, setOptionsMenuContext] = useState(['Serviços', 'Informações', 'Avaliações']);
+  const [optionsMenuContext, setOptionsMenuContext] = useState(['Serviços', 'Avaliações']);
   const [optionMenuContextSelected, setOptionMenuContextSelected] = useState(optionsMenuContext[0]);
   const [tabContainerWidth, setTabContainerWidth] = useState(0);
 
@@ -62,16 +63,6 @@ export const ProfessionalProfile: React.FC = () => {
       isMounted = false;
     };
   }, [route.params.professionalId]);
-
-  // useMemo(() => {
-  //   const response = getRatingsByProfessionalId({
-  //     professionalId: route.params.professionalId,
-  //   });
-
-  //   if (!response) return;
-
-  //   setReviews(response);
-  // }, [route.params.professionalId]);
 
   // callbacks
   const handleTabChange = (option: string) => {
@@ -130,65 +121,40 @@ export const ProfessionalProfile: React.FC = () => {
         <S.BlurBackground intensity={60} tint="light">
           <S.StatsContent>
             <S.StatItem>
-              <S.StatValue>{12} years</S.StatValue>
-              <S.StatLabel>Experience</S.StatLabel>
+              <S.StatValue>321</S.StatValue>
+              <S.StatLabel>Clientes</S.StatLabel>
             </S.StatItem>
 
             <S.StatItem>
-              <S.StatValue>{1243}+</S.StatValue>
-              <S.StatLabel>Patients</S.StatLabel>
+              <S.StatValue>1312+</S.StatValue>
+              <S.StatLabel>Uorks</S.StatLabel>
             </S.StatItem>
 
             <S.StatItem>
-              <S.StatValue>{12}</S.StatValue>
-              <S.StatLabel>Operations</S.StatLabel>
+              <S.StatValue>15 min</S.StatValue>
+              <S.StatLabel>Responde</S.StatLabel>
             </S.StatItem>
           </S.StatsContent>
         </S.BlurBackground>
       </S.StatsContainer>
 
       <S.TabSeparatorContainer>
-        <S.TabContainer
-          onLayout={(event) => {
-            setTabContainerWidth(event.nativeEvent.layout.width);
-          }}
-        >
-          <S.TabBackground />
-          <S.TabSlider
-            style={{
-              left: sliderAnimation,
-              width: tabContainerWidth / optionsMenuContext.length,
-            }}
-          />
-          {optionsMenuContext.map((option) => (
-            <S.TabButton key={option} onPress={() => handleTabChange(option)}>
-              <S.TabText isActive={optionMenuContextSelected === option}>
-                {option}
-              </S.TabText>
-            </S.TabButton>
-          ))}
-        </S.TabContainer>
+      <ContextSwitcher options={optionsMenuContext} optionSelected={optionMenuContextSelected} setOptionSelected={setOptionMenuContextSelected} />
+
       </S.TabSeparatorContainer>
 
-      {/* <S.HeaderOptionsContainer>
-        <ContextSwitcher
-          optionSelected={optionMenuContextSelected}
-          options={optionsMenuContext}
-          setOptionSelected={setOptionMenuContextSelected}
-        />
-      </S.HeaderOptionsContainer> */}
 
       {professional && (
         <>
           {optionMenuContextSelected === optionsMenuContext[0] ? (
-            <S.ServiceContainer>  
+            <S.ServiceContainer>
               {services.map((service) => (
                 <Service
                   service={service}
                   key={service.id}
                   professionalData={{ name: professional.name, image: professional.image }}
                 />
-              ))}   
+              ))}
             </S.ServiceContainer>
           ) : (
             <S.RatingContainer>
@@ -205,58 +171,6 @@ export const ProfessionalProfile: React.FC = () => {
           )}
         </>
       )}
-
-      {/* <S.Content>
-        {professional && (
-          <>
-            <Header icon="arrow-left" />
-
-            <S.ScrollViewContainer showsVerticalScrollIndicator={false}>
-              <Details
-                avatar={professional.image}
-                ordersCount={professional.completedServicesCount}
-                ratingsAvg={professional.ratingsAggregate.avg}
-                ratingsCount={professional.ratingsAggregate.count}
-                name={professional.name}
-                profession={professional.profession}
-                description={professional.description}
-              />
-
-              <S.HeaderOptionsContainer>
-                <ContextSwitcher
-                  optionSelected={optionMenuContextSelected}
-                  options={optionsMenuContext}
-                  setOptionSelected={setOptionMenuContextSelected}
-                />
-              </S.HeaderOptionsContainer>
-
-              {optionMenuContextSelected === optionsMenuContext[0] ? (
-                <S.ServiceContainer>
-                  {services.map((service) => (
-                    <Service
-                      service={service}
-                      key={service.id}
-                      professionalData={{ name: professional.name, image: professional.image }}
-                    />
-                  ))}
-                </S.ServiceContainer>
-              ) : (
-                <S.RatingContainer>
-                  {reviews &&
-                    reviews.map((review) => (
-                      <RatingView
-                        showServiceName
-                        style={{ marginBottom: 20 }}
-                        review={review}
-                        key={review.id}
-                      />
-                    ))}
-                </S.RatingContainer>
-              )}
-            </S.ScrollViewContainer>
-          </>
-        )}
-      </S.Content> */}
     </S.Container>
   );
 };
