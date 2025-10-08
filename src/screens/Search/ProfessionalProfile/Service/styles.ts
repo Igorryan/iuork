@@ -4,12 +4,13 @@ import { Feather } from '@expo/vector-icons';
 
 export const Container = styled(TouchableOpacity)`
   background: ${({ theme }) => theme.COLORS.WHITE};
-
-  border-radius: 14px;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.COLORS.GREY_20};
+  border-radius: 16px;
+  margin-bottom: 16px;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.08;
+  shadow-radius: 8px;
+  elevation: 3;
 `;
 
 export const Row = styled(View)`
@@ -19,20 +20,21 @@ export const Row = styled(View)`
 
 export const CardContent = styled(View)`
   flex-direction: row;
-  align-items: center;
-  padding: 16px 16px;
+  align-items: flex-start;
+  padding: 16px;
 `;
 
 export const Thumbnail = styled(Image)`
-  width: 68px;
-  height: 68px;
-  border-radius: 12px;
+  width: 88px;
+  height: 88px;
+  border-radius: 16px;
   background-color: ${({ theme }) => theme.COLORS.GREY_10};
 `;
 
 export const ContentColumn = styled(View)`
   flex: 1;
-  margin-left: 14px;
+  margin-left: 16px;
+  justify-content: flex-start;
 `;
 
 export const ServiceTitle = styled(Text)`
@@ -40,18 +42,26 @@ export const ServiceTitle = styled(Text)`
   font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
   color: ${({ theme }) => theme.COLORS.GREY};
   line-height: 22px;
+  margin-bottom: 2px;
 `;
 
 export const MetaRow = styled(Row)`
-  margin-top: 8px;
+  margin-top: 6px;
+  margin-bottom: 8px;
 `;
 
 export const ServiceDescription = styled(Text)`
-  margin-top: 8px;
   font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
-  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
   color: ${({ theme }) => theme.COLORS.GREY_60};
-  line-height: 18px;
+  line-height: 20px;
+`;
+
+export const DescriptionLabel = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
+  color: ${({ theme }) => theme.COLORS.GREY};
+  margin-bottom: 4px;
 `;
 
 export const MetaText = styled(Text)`
@@ -115,7 +125,8 @@ export const PriceText = styled(Text)`
 
 export const RightColumn = styled(View)`
   align-items: flex-end;
-  margin-left: 12px;
+  justify-content: center;
+  margin-left: 8px;
 `;
 
 export const Chevron = styled(Feather).attrs({ name: 'chevron-right' })`
@@ -123,45 +134,39 @@ export const Chevron = styled(Feather).attrs({ name: 'chevron-right' })`
 `;
 
 export const PlaceholderThumb = styled(View)`
-  width: 68px;
-  height: 68px;
-  border-radius: 12px;
+  width: 88px;
+  height: 88px;
+  border-radius: 16px;
   background-color: ${({ theme }) => theme.COLORS.GREY_10};
 `;
 
 export const ThumbOverlay = styled(View)`
   position: absolute;
-  bottom: 8px;
-  right: 8px;
+  bottom: 6px;
+  left: 6px;
   padding: 4px 8px;
-  background-color: ${({ theme }) => theme.COLORS.WHITE};
-  border-radius: 12px;
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.COLORS.SECONDARY};
+  background-color: rgba(0, 0, 0, 0.75);
+  border-radius: 8px;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  shadow-color: #000;
-  shadow-offset: 0px 1px;
-  shadow-opacity: 0.15;
-  shadow-radius: 2px;
-  elevation: 2;
 `;
 
 export const ThumbOverlayText = styled(Text)`
-  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
-  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
-  color: ${({ theme }) => theme.COLORS.SECONDARY};
+  font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
+  font-size: 10px;
+  color: ${({ theme }) => theme.COLORS.WHITE};
+  margin-left: 4px;
 `;
 
 export const ThumbOverlayIcon = styled(Feather).attrs({ name: 'image' })`
-  color: ${({ theme }) => theme.COLORS.SECONDARY};
-  margin-right: 4px;
+  color: ${({ theme }) => theme.COLORS.WHITE};
 `;
 
 export const ThumbWrapper = styled(View)`
   position: relative;
-  width: 68px;
-  height: 68px;
+  width: 88px;
+  height: 88px;
 `;
 
 export const Dot = styled(View)`
@@ -174,16 +179,32 @@ export const Dot = styled(View)`
 
 export const Trailing = styled(Row)``;
 
+export const BudgetBadgeButton = styled(TouchableOpacity)`
+  padding: 10px 20px;
+  background-color: ${({ theme }) => theme.COLORS.SECONDARY};
+  border-radius: 24px;
+  shadow-color: ${({ theme }) => theme.COLORS.SECONDARY};
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.3;
+  shadow-radius: 4px;
+  elevation: 3;
+`;
+
 export const BudgetBadge = styled(View)`
-  padding: 6px 10px;
-  border: 1px solid ${({ theme }) => theme.COLORS.SECONDARY};
-  border-radius: 999px;
+  padding: 10px 20px;
+  background-color: ${({ theme }) => theme.COLORS.SECONDARY};
+  border-radius: 24px;
+  shadow-color: ${({ theme }) => theme.COLORS.SECONDARY};
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.3;
+  shadow-radius: 4px;
+  elevation: 3;
 `;
 
 export const BudgetBadgeText = styled(Text)`
   font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
-  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
-  color: ${({ theme }) => theme.COLORS.SECONDARY};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
+  color: ${({ theme }) => theme.COLORS.WHITE};
 `;
 
 export const CarouselImage = styled(Image)`

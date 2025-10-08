@@ -40,6 +40,7 @@ export interface Service {
 export interface Professional {
   id: string;
   image: string;
+  coverImage?: string;
   name: string;
   profession: string;
   description: string;

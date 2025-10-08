@@ -13,7 +13,7 @@ import { ProfessionalsVerticalList } from '@screens/Search/Home/ProfessionalsVer
 import { ProfessionalProfile } from '@screens/Search/ProfessionalProfile';
 import { ServiceDetail } from '@screens/Search/ServiceDetail';
 import { ServicePhotoGallery } from '@screens/Search/ServicePhotoGallery';
-// import { Chat } from '@screens/Search/Chat';
+import { Chat } from '@screens/Chat';
 
 // Tipos das rotas
 export type RootStackParamList = {
@@ -33,7 +33,12 @@ export type RootStackParamList = {
     };
   };
   ServicePhotoGallery: { images: string[] };
-  // Chat: undefined;
+  Chat: {
+    professionalName: string;
+    professionalImage: string;
+    serviceId: string;
+    serviceName: string;
+  };
 };
 
 // Criação do Stack Navigator
@@ -77,11 +82,11 @@ const screens = [
     component: ServicePhotoGallery,
     options: { headerShown: false },
   },
-  // {
-  //   name: 'Chat',
-  //   component: Chat,
-  //   options: { headerShown: false },
-  // },
+  {
+    name: 'Chat',
+    component: Chat,
+    options: { headerShown: false },
+  },
 ];
 
 // Componente Principal

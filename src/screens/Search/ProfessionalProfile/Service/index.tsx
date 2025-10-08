@@ -37,6 +37,22 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
   // variables
 
   // callbacks
+  const handleServicePress = () => {
+    navigation.navigate('ServiceDetail', {
+      serviceId: service.id,
+      professionalData,
+    });
+  };
+
+  const handleBudgetPress = (e: any) => {
+    e.stopPropagation();
+    navigation.navigate('Chat', {
+      professionalName: professionalData.name,
+      professionalImage: professionalData.image,
+      serviceId: service.id,
+      serviceName: service.name,
+    });
+  };
 
   // effects
 
@@ -44,12 +60,7 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
   return (
     <S.Container
       activeOpacity={0.9}
-      onPress={() =>
-        navigation.navigate('ServiceDetail', {
-          serviceId: service.id,
-          professionalData,
-        })
-      }
+      onPress={handleServicePress}
     >
       <S.CardContent>
         {service.images?.[0] ? (
@@ -61,10 +72,8 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
             />
             {service.images.length > 1 && (
               <S.ThumbOverlay>
-                <S.Row>
-                  <S.ThumbOverlayIcon name="image" size={12} />
-                  <S.ThumbOverlayText>+{service.images.length - 1}</S.ThumbOverlayText>
-                </S.Row>
+                <S.ThumbOverlayIcon name="image" size={10} />
+                <S.ThumbOverlayText>{service.images.length}</S.ThumbOverlayText>
               </S.ThumbOverlay>
             )}
           </S.ThumbWrapper>
@@ -75,16 +84,18 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
         <S.ContentColumn>
           <S.ServiceTitle numberOfLines={2}>{service.name}</S.ServiceTitle>
           <S.MetaRow>
-            <StarRating rating={4.5} size={12} />
+            <StarRating rating={4.5} size={14} />
             <S.MetaText>4.5 (48)</S.MetaText>
             <S.Dot />
-            <MaterialCommunityIcons name="clock-outline" size={12} color={COLORS.GREY_60} />
+            <MaterialCommunityIcons name="clock-outline" size={14} color={COLORS.GREY_60} />
             <S.MetaText>30 min</S.MetaText>
           </S.MetaRow>
           {!!service.description && (
-            <S.ServiceDescription numberOfLines={2}>
-              {service.description}
-            </S.ServiceDescription>
+            <>
+              <S.ServiceDescription numberOfLines={2}>
+                {service.description}
+              </S.ServiceDescription>
+            </>
           )}
         </S.ContentColumn>
 
@@ -97,9 +108,9 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
               </S.PriceText>
             </S.PricePill>
           ) : (
-            <S.BudgetBadge>
+            <S.BudgetBadgeButton onPress={handleBudgetPress}>
               <S.BudgetBadgeText>Orçar</S.BudgetBadgeText>
-            </S.BudgetBadge>
+            </S.BudgetBadgeButton>
           )}
         </S.RightColumn>
       </S.CardContent>
