@@ -99,3 +99,22 @@ export const TabSeparatorContainer = styled(View)`
   margin-bottom: 20px;
 `;
 
+// Sections within Reviews tab
+export const SectionContainer = styled(View)`
+  margin-bottom: 16px;
+`;
+
+export const SectionTitle = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
+  font-size: ${({ theme }) => theme.FONT_SIZE.LG}px;
+  color: ${({ theme }) => theme.COLORS.GREY};
+  margin-bottom: 8px;
+`;
+
+export const SectionText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
+  font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
+  color: ${({ theme }) => theme.COLORS.GREY_60};
+  line-height: 22px;
+`;
+

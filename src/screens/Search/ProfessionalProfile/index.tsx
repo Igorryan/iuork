@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Animated } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 // styles
 import * as S from './styles';
@@ -101,6 +102,7 @@ export const ProfessionalProfile: React.FC = () => {
   // renders
   return (
     <S.Container>
+      <StatusBar style="dark" backgroundColor="#EDEDED" />
       <S.HeaderContainer>
         <S.Content>
           <Header icon="arrow-left" />
@@ -158,6 +160,19 @@ export const ProfessionalProfile: React.FC = () => {
             </S.ServiceContainer>
           ) : (
             <S.RatingContainer>
+              {/* Sobre o profissional */}
+              <S.SectionContainer>
+                <S.SectionTitle>Sobre o profissional</S.SectionTitle>
+                {professional?.description ? (
+                  <S.SectionText>{professional.description}</S.SectionText>
+                ) : null}
+              </S.SectionContainer>
+
+              {/* Comentários e avaliações */}
+              <S.SectionContainer>
+                <S.SectionTitle>Comentários e avaliações</S.SectionTitle>
+              </S.SectionContainer>
+
               {reviews &&
                 reviews.map((review) => (
                   <RatingView

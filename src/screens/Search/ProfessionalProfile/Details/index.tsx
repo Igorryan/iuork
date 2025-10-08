@@ -50,7 +50,7 @@ export const Details: React.FC<DetailsProps> = ({
           <S.UserName>{name}</S.UserName>
           <S.ProfessionText>{profession}</S.ProfessionText>
           <S.ButtonMessage style={{ borderRadius: 24 }}>
-            <S.ButtonMessageText>Message</S.ButtonMessageText>
+            <S.ButtonMessageText>Conversar</S.ButtonMessageText>
           </S.ButtonMessage>
 
         </S.ProfileInfoContainer>
