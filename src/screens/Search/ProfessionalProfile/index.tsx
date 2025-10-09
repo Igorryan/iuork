@@ -224,7 +224,7 @@ export const ProfessionalProfile: React.FC = () => {
                 <Service
                   service={service}
                   key={service.id}
-                  professionalData={{ name: professional.name, image: professional.image }}
+                  professionalData={{ id: professional.userId, name: professional.name, image: professional.image }}
                 />
               ))}
             </S.ServiceContainer>

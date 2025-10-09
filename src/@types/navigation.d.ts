@@ -5,6 +5,13 @@ export declare global {
       Address: undefined;
       ConfirmAddress: undefined;
       ProfessionalProfile: undefined;
+      Chat: {
+        professionalId: string;
+        professionalName: string;
+        professionalImage: string;
+        serviceId: string;
+        serviceName: string;
+      };
     }
   }
 }

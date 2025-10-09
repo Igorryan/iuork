@@ -25,6 +25,7 @@ type ServiceDetailRouteParamList = {
   Detail: {
     serviceId: string;
     professionalData: {
+      id: string; // userId do profissional
       name: string;
       image: string;
     };
@@ -114,7 +115,13 @@ export const ServiceDetail: React.FC = () => {
         </>
       )}
 
-      <Footer servicePrice={service?.price || 0} pricingType={service?.pricingType} />
+      <Footer 
+        servicePrice={service?.price || 0} 
+        pricingType={service?.pricingType}
+        professionalData={route.params.professionalData}
+        serviceId={route.params.serviceId}
+        serviceName={service?.name || ''}
+      />
     </S.Container>
   );
 };

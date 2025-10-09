@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as S from './styles';
 import { RootStackParamList } from '@routes/stack.routes';
 import { useChat } from '@hooks/useChat';
+import { useAuth } from '@hooks/auth';
 import { AudioPlayer } from '@components/AudioPlayer';
 
 type ChatRouteProps = RouteProp<RootStackParamList, 'Chat'>;
@@ -13,11 +14,9 @@ export const Chat: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<ChatRouteProps>();
   const scrollViewRef = useRef<ScrollView>(null);
+  const { user } = useAuth();
   
-  const { professionalName, professionalImage, serviceId, serviceName } = route.params;
-  
-  // Extrair professionalId do serviceId ou usar um mock
-  const professionalId = serviceId.split('_')[0] || 'prof_1';
+  const { professionalId, professionalName, professionalImage, serviceId, serviceName } = route.params;
 
   const {
     messages,
@@ -25,13 +24,18 @@ export const Chat: React.FC = () => {
     setInputText,
     isRecording,
     recordingDuration,
+    isLoadingChat,
     sendTextMessage,
     pickImage,
     takePhoto,
     startRecording,
     stopRecording,
     cancelRecording,
-  } = useChat({ professionalId, serviceId });
+  } = useChat({ 
+    professionalId, 
+    serviceId, 
+    userId: user?.id || '' 
+  });
 
   const [budgetInfo] = useState({
     serviceName: serviceName || 'Unha das Mãos',

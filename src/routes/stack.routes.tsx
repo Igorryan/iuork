@@ -34,6 +34,7 @@ export type RootStackParamList = {
   };
   ServicePhotoGallery: { images: string[] };
   Chat: {
+    professionalId: string;
     professionalName: string;
     professionalImage: string;
     serviceId: string;

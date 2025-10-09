@@ -18,6 +18,7 @@ import StarRating from '@components/StarRating';
 interface IProps {
   service: IService;
   professionalData: {
+    id: string;
     name: string;
     image: string;
   };
@@ -47,6 +48,7 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
   const handleBudgetPress = (e: any) => {
     e.stopPropagation();
     navigation.navigate('Chat', {
+      professionalId: professionalData.id,
       professionalName: professionalData.name,
       professionalImage: professionalData.image,
       serviceId: service.id,

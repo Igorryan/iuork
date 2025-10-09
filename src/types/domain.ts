@@ -39,6 +39,7 @@ export interface Service {
 
 export interface Professional {
   id: string;
+  userId: string; // ✅ ID do User (necessário para chat)
   image: string;
   coverImage?: string;
   name: string;
