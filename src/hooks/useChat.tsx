@@ -13,6 +13,7 @@ import {
   Chat,
 } from '@api/callbacks/chat';
 import { useSocket, SocketEvents } from './useSocket';
+import { api } from '@config/api';
 
 export interface ChatMessage {
   id: string;
@@ -31,9 +32,10 @@ interface UseChatProps {
   professionalId: string;
   serviceId: string;
   userId: string; // ID do cliente logado
+  budgetId?: string; // Opcional: ID do orçamento (para buscar chat específico)
 }
 
-export const useChat = ({ professionalId, serviceId, userId }: UseChatProps) => {
+export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -48,7 +50,7 @@ export const useChat = ({ professionalId, serviceId, userId }: UseChatProps) => 
   // Inicializar chat e buscar mensagens
   useEffect(() => {
     initializeChat();
-  }, [professionalId, serviceId, userId]);
+  }, [professionalId, serviceId, userId, budgetId]);
 
   // WebSocket: Entrar na sala do chat e ouvir novas mensagens
   useEffect(() => {
@@ -100,6 +102,24 @@ export const useChat = ({ professionalId, serviceId, userId }: UseChatProps) => 
   const initializeChat = async () => {
     try {
       setIsLoadingChat(true);
+      
+      // Se budgetId foi fornecido, buscar o chat daquele orçamento
+      if (budgetId) {
+        console.log('📦 Buscando chat do orçamento:', budgetId);
+        try {
+          const { data } = await api.get(`/api/budgets/${budgetId}`);
+          
+          if (data && data.chatId) {
+            console.log('✅ Chat do orçamento encontrado:', data.chatId);
+            setChatId(data.chatId);
+            await fetchMessages(data.chatId);
+            return;
+          }
+        } catch (error) {
+          console.error('Erro ao buscar chat do orçamento:', error);
+        }
+      }
+      
       // Apenas verificar se o chat já existe (sem criar)
       const chat = await checkChatExists({
         clientId: userId,

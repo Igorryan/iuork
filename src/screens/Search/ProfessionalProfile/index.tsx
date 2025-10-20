@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Animated, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
@@ -6,17 +6,20 @@ import { StatusBar } from 'expo-status-bar';
 import * as S from './styles';
 
 // libs
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 
 // application
 import { getProfessional } from '@api/callbacks/professional';
 import { getServicesByProfessional } from '@api/callbacks/service';
 import { getReviewsByProfessional } from '@api/callbacks/review';
 import { isFavorite, toggleFavorite } from '@functions/favorites';
+import { getAcceptedBudget, getPendingBudget, getBudgetWithPrice } from '@api/callbacks/budget';
+import { useAuth } from '@hooks/auth';
 
 import { RatingView } from '@components/RatingView';
 
 import { Service } from './Service';
+import { useSocket } from '@hooks/useSocket';
 
 // consts
 
@@ -34,6 +37,7 @@ export const ProfessionalProfile: React.FC = () => {
   // hooks
   const route = useRoute<ScreenRoute>();
   const navigation = useNavigation();
+  const { user } = useAuth();
 
   // refs
 
@@ -46,6 +50,9 @@ export const ProfessionalProfile: React.FC = () => {
   const [tabContainerWidth, setTabContainerWidth] = useState(0);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [acceptedBudgets, setAcceptedBudgets] = useState<Map<string, number>>(new Map());
+  const [pendingBudgets, setPendingBudgets] = useState<Set<string>>(new Set());
+  const socket = useSocket();
   // refs
   const sliderAnimation = useRef(new Animated.Value(0)).current;
 
@@ -70,6 +77,96 @@ export const ProfessionalProfile: React.FC = () => {
       isMounted = false;
     };
   }, [route.params.professionalId]);
+
+  // Entrar na sala do cliente para receber notificações de orçamentos
+  useEffect(() => {
+    if (socket && user?.id) {
+      console.log('🔌 [PROFILE] Entrando na sala do cliente:', user.id);
+      socket.emit('join-client', user.id);
+    }
+  }, [socket, user?.id]);
+
+  // Ouvir atualizações de orçamentos via WebSocket
+  useEffect(() => {
+    if (socket && user?.id) {
+      const handleNewBudget = (data: any) => {
+        console.log('🔔 [PROFILE] Novo orçamento recebido!', data);
+        
+        const serviceId = data.serviceId;
+        const price = parseFloat(data.price);
+        
+        // Se o preço foi definido (> 0), atualizar o mapa de preços
+        if (price > 0) {
+          setAcceptedBudgets((prev) => {
+            const updated = new Map(prev);
+            updated.set(serviceId, price);
+            console.log('✅ [PROFILE] Preço atualizado para serviço:', serviceId, '- R$', price);
+            return updated;
+          });
+          
+          // Remover de pendentes já que agora tem preço
+          setPendingBudgets((prev) => {
+            const updated = new Set(prev);
+            updated.delete(serviceId);
+            return updated;
+          });
+        }
+      };
+
+      socket.on('new-budget', handleNewBudget);
+
+      return () => {
+        socket.off('new-budget', handleNewBudget);
+      };
+    }
+  }, [socket, user?.id]);
+
+  // Buscar orçamentos aceitos para todos os serviços deste profissional
+  const loadBudgets = useCallback(async () => {
+    if (!user?.id || services.length === 0) return;
+
+    const budgetsMap = new Map<string, number>();
+    const pendingSet = new Set<string>();
+    
+    // Buscar orçamento aceito, pendente e com preço para cada serviço
+    await Promise.all(
+      services.map(async (service) => {
+        const [acceptedBudget, pendingBudget, budgetWithPrice] = await Promise.all([
+          getAcceptedBudget(service.id, user.id),
+          getPendingBudget(service.id, user.id),
+          getBudgetWithPrice(service.id, user.id),
+        ]);
+        
+        if (acceptedBudget) {
+          budgetsMap.set(service.id, parseFloat(acceptedBudget.price));
+        } else if (budgetWithPrice) {
+          // Se tem orçamento com preço definido mas ainda pendente
+          budgetsMap.set(service.id, parseFloat(budgetWithPrice.price));
+        }
+        
+        if (pendingBudget) {
+          // Apenas marca como pendente se ainda não tem preço
+          pendingSet.add(service.id);
+        }
+      })
+    );
+    
+    setAcceptedBudgets(budgetsMap);
+    setPendingBudgets(pendingSet);
+  }, [user?.id, services]);
+
+  // Carregar orçamentos quando services ou user mudar
+  useEffect(() => {
+    loadBudgets();
+  }, [loadBudgets]);
+
+  // Recarregar orçamentos quando a tela recebe foco
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🔄 [PROFILE] Tela recebeu foco - Recarregando orçamentos');
+      loadBudgets();
+    }, [loadBudgets])
+  );
 
   const handleToggleFavorite = async () => {
     if (!professional) return;
@@ -225,6 +322,8 @@ export const ProfessionalProfile: React.FC = () => {
                   service={service}
                   key={service.id}
                   professionalData={{ id: professional.userId, name: professional.name, image: professional.image }}
+                  acceptedBudgetPrice={acceptedBudgets.get(service.id)}
+                  hasPendingBudget={pendingBudgets.has(service.id)}
                 />
               ))}
             </S.ServiceContainer>

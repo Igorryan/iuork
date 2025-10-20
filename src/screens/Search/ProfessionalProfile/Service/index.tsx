@@ -5,11 +5,16 @@ import * as S from './styles';
 // libs
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Alert } from 'react-native';
 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@routes/stack.routes';
 
 // application
+import { BudgetRequestModal } from '@components/BudgetRequestModal';
+import { createBudgetRequest } from '@api/callbacks/budget';
+import { useAuth } from '@hooks/auth';
 
 // types
 import { Service as IService } from '../../../../types/domain';
@@ -22,20 +27,26 @@ interface IProps {
     name: string;
     image: string;
   };
+  acceptedBudgetPrice?: number;
+  hasPendingBudget?: boolean;
 }
 
-export const Service: React.FC<IProps> = ({ service, professionalData }) => {
+export const Service: React.FC<IProps> = ({ service, professionalData, acceptedBudgetPrice, hasPendingBudget }) => {
   // hooks
 
   const { COLORS } = useTheme();
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { user } = useAuth();
 
   // refs
 
   // states
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [isCreatingRequest, setIsCreatingRequest] = useState(false);
 
   // variables
+  const displayPrice = acceptedBudgetPrice ?? service.price;
 
   // callbacks
   const handleServicePress = () => {
@@ -47,23 +58,67 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
 
   const handleBudgetPress = (e: any) => {
     e.stopPropagation();
-    navigation.navigate('Chat', {
-      professionalId: professionalData.id,
-      professionalName: professionalData.name,
-      professionalImage: professionalData.image,
-      serviceId: service.id,
-      serviceName: service.name,
-    });
+    
+    // Se já tem orçamento pendente, leva direto para o chat sem modal
+    if (hasPendingBudget) {
+      navigation.navigate('Chat', {
+        professionalId: professionalData.id,
+        professionalName: professionalData.name,
+        professionalImage: professionalData.image,
+        serviceId: service.id,
+        serviceName: service.name,
+      });
+    } else {
+      setShowBudgetModal(true);
+    }
+  };
+
+  const handleConfirmBudget = async () => {
+    if (!user?.id) return;
+    
+    setShowBudgetModal(false);
+    setIsCreatingRequest(true);
+    
+    try {
+      // Criar solicitação de orçamento no banco de dados
+      await createBudgetRequest(user.id, professionalData.id, service.id);
+      
+      // Navegar para o chat
+      navigation.navigate('Chat', {
+        professionalId: professionalData.id,
+        professionalName: professionalData.name,
+        professionalImage: professionalData.image,
+        serviceId: service.id,
+        serviceName: service.name,
+        sendBudgetRequest: true,
+      });
+    } catch (error) {
+      console.error('Erro ao criar solicitação de orçamento:', error);
+      Alert.alert('Erro', 'Não foi possível criar a solicitação. Tente novamente.');
+    } finally {
+      setIsCreatingRequest(false);
+    }
   };
 
   // effects
 
   // renders
   return (
-    <S.Container
-      activeOpacity={0.9}
-      onPress={handleServicePress}
-    >
+    <>
+      <BudgetRequestModal
+        visible={showBudgetModal}
+        onClose={() => setShowBudgetModal(false)}
+        onConfirm={handleConfirmBudget}
+        serviceName={service.name}
+        serviceDescription={service.description || undefined}
+        professionalName={professionalData.name}
+        professionalImage={professionalData.image}
+      />
+      
+      <S.Container
+        activeOpacity={0.9}
+        onPress={handleServicePress}
+      >
       <S.CardContent>
         {service.images?.[0] ? (
           <S.ThumbWrapper>
@@ -102,13 +157,17 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
         </S.ContentColumn>
 
         <S.RightColumn>
-          {service.price ? (
+          {displayPrice ? (
             <S.PricePill>
               <S.PriceText>
-                R$ {service.price}
+                R$ {displayPrice}
                 {service.pricingType === 'HOURLY' ? '/h' : ''}
               </S.PriceText>
             </S.PricePill>
+          ) : hasPendingBudget ? (
+            <S.BudgetBadgeButton onPress={handleBudgetPress} style={{ backgroundColor: '#FFA500' }}>
+              <S.BudgetBadgeText>Aguardando...</S.BudgetBadgeText>
+            </S.BudgetBadgeButton>
           ) : (
             <S.BudgetBadgeButton onPress={handleBudgetPress}>
               <S.BudgetBadgeText>Orçar</S.BudgetBadgeText>
@@ -117,5 +176,6 @@ export const Service: React.FC<IProps> = ({ service, professionalData }) => {
         </S.RightColumn>
       </S.CardContent>
     </S.Container>
+    </>
   );
 };

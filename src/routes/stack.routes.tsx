@@ -14,6 +14,7 @@ import { ProfessionalProfile } from '@screens/Search/ProfessionalProfile';
 import { ServiceDetail } from '@screens/Search/ServiceDetail';
 import { ServicePhotoGallery } from '@screens/Search/ServicePhotoGallery';
 import { Chat } from '@screens/Chat';
+import { BudgetDetail } from '@screens/BudgetDetail';
 
 // Tipos das rotas
 export type RootStackParamList = {
@@ -39,6 +40,12 @@ export type RootStackParamList = {
     professionalImage: string;
     serviceId: string;
     serviceName: string;
+    sendBudgetRequest?: boolean;
+    sendBudgetAcceptanceMessage?: boolean;
+    budgetId?: string;
+  };
+  BudgetDetail: {
+    budgetId: string;
   };
 };
 
@@ -86,6 +93,11 @@ const screens = [
   {
     name: 'Chat',
     component: Chat,
+    options: { headerShown: false },
+  },
+  {
+    name: 'BudgetDetail',
+    component: BudgetDetail,
     options: { headerShown: false },
   },
 ];
