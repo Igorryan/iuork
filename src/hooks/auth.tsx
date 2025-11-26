@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '@config/api';
 
-type User = { id: string; name: string; email?: string | null; role: 'CLIENT' | 'PRO' };
+type User = { id: string; name: string; email?: string | null; role: 'CLIENT' | 'PRO'; avatarUrl?: string | null };
 
 type AuthContextValue = {
   isAuthenticated: boolean;
@@ -31,8 +31,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           AsyncStorage.getItem(USER_KEY),
         ]);
         if (token && userJson) {
+          const parsedUser = JSON.parse(userJson);
+          // Verifica se o usuário salvo tem role CLIENT antes de restaurar a sessão
+          if (parsedUser.role !== 'CLIENT') {
+            // Limpa dados inválidos do AsyncStorage
+            await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+            delete api.defaults.headers.common.Authorization;
+            return;
+          }
           api.defaults.headers.common.Authorization = `Bearer ${token}`;
-          setUser(JSON.parse(userJson));
+          setUser(parsedUser);
           setIsAuthenticated(true);
         }
       } finally {
@@ -44,6 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
     const { token, user: returnedUser } = res.data as { token: string; user: User };
+    
+    // Verifica se o usuário tem role CLIENT antes de permitir login no app
+    if (returnedUser.role !== 'CLIENT') {
+      throw new Error('Esta aplicação é apenas para clientes. Por favor, use a aplicação de profissionais.');
+    }
+    
     await Promise.all([
       AsyncStorage.setItem(TOKEN_KEY, token),
       AsyncStorage.setItem(USER_KEY, JSON.stringify(returnedUser)),

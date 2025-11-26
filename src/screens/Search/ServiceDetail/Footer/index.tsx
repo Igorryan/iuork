@@ -9,13 +9,14 @@ import { RootStackParamList } from '@routes/stack.routes';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import theme from '@theme/index';
+
 
 // application
 import { BudgetRequestModal } from '@components/BudgetRequestModal';
-import { createBudgetRequest, cancelBudget } from '@api/callbacks/budget';
+import { createBudgetRequest, cancelBudget, Budget } from '@api/callbacks/budget';
 import { useAuth } from '@hooks/auth';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import theme from '@theme/index';
 
 // consts
 
@@ -35,65 +36,36 @@ type FooterProps = {
   hasPendingBudget?: boolean;
   budgetId?: string | null;
   budgetStatus?: 'PENDING' | 'QUOTED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED';
+  currentBudget?: Budget | null;
 };
 
-export const Footer: React.FC<FooterProps> = ({ 
-  servicePrice, 
+export const Footer: React.FC<FooterProps> = ({
+  servicePrice,
   pricingType,
   professionalData,
   serviceId,
   serviceName,
   serviceDescription,
-  hasPendingBudget,
   budgetId,
   budgetStatus,
+  currentBudget,
 }) => {
   // hooks
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
-  
-  const handleBudgetPress = () => {
-    if (!professionalData || !serviceId) return;
-    
-    // Verificar se é um serviço tipo BUDGET (orçar)
-    if (pricingType === 'BUDGET' || servicePrice === 0) {
-      // Se já tem orçamento pendente, vai direto para o chat
-      if (hasPendingBudget && budgetId) {
-        navigation.navigate('Chat', {
-          professionalId: professionalData.id,
-          professionalName: professionalData.name,
-          professionalImage: professionalData.image,
-          serviceId,
-          serviceName: serviceName || '',
-          budgetId: budgetId, // ✅ Passa o budgetId do orçamento pendente
-        });
-      } else {
-        setShowBudgetModal(true);
-      }
-    } else {
-      navigation.navigate('Chat', {
-        professionalId: professionalData.id,
-        professionalName: professionalData.name,
-        professionalImage: professionalData.image,
-        serviceId,
-        serviceName: serviceName || '',
-        budgetId: budgetId || undefined, // ✅ Passa budgetId se existir
-      });
-    }
-  };
 
   const handleConfirmBudget = async () => {
     if (!professionalData || !serviceId || !user?.id) return;
-    
+
     setShowBudgetModal(false);
     setIsCreatingRequest(true);
-    
+
     try {
       // Criar solicitação de orçamento no banco de dados
       await createBudgetRequest(user.id, professionalData.id, serviceId);
-      
+
       // Navegar para o chat
       navigation.navigate('Chat', {
         professionalId: professionalData.id,
@@ -111,67 +83,69 @@ export const Footer: React.FC<FooterProps> = ({
     }
   };
 
-  const handleRefreshBudget = async () => {
-    if (!budgetId || !professionalData || !serviceId || !user?.id) return;
+  const formatExpiryDate = (dateString: string | null) => {
+    if (!dateString) return null;
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    Alert.alert(
-      'Refazer Orçamento',
-      'Deseja realmente cancelar o orçamento atual e solicitar um novo? Esta ação não pode ser desfeita.',
-      [
-        {
-          text: 'Não',
-          style: 'cancel',
-        },
-        {
-          text: 'Sim, Refazer',
-          style: 'destructive',
-          onPress: async () => {
-            setIsCreatingRequest(true);
-            
-            try {
-              // 1. Cancelar orçamento atual
-              const cancelled = await cancelBudget(budgetId);
-              
-              if (!cancelled) {
-                throw new Error('Falha ao cancelar orçamento');
-              }
-
-              console.log('✅ Orçamento anterior cancelado:', budgetId);
-
-              // 2. Criar novo orçamento (retorna com dados do chat)
-              const newBudget = await createBudgetRequest(user.id, professionalData.id, serviceId);
-              
-              if (!newBudget || !newBudget.chat) {
-                throw new Error('Falha ao criar novo orçamento');
-              }
-
-              console.log('✅ Novo orçamento criado:', newBudget.id);
-              console.log('✅ Novo chat:', newBudget.chatId);
-
-              // 3. Navegar para o chat do NOVO orçamento
-              navigation.navigate('Chat', {
-                professionalId: newBudget.chat.professionalId,
-                professionalName: newBudget.chat.professional.name,
-                professionalImage: newBudget.chat.professional.avatarUrl || '',
-                serviceId: newBudget.serviceId,
-                serviceName: newBudget.chat.service?.title || serviceName || '',
-                budgetId: newBudget.id, // ✅ Passa o ID do NOVO orçamento
-                sendBudgetRequest: true,
-              });
-
-              Alert.alert('Sucesso', 'Novo orçamento solicitado com sucesso!');
-            } catch (error) {
-              console.error('Erro ao refazer orçamento:', error);
-              Alert.alert('Erro', 'Não foi possível refazer o orçamento. Tente novamente.');
-            } finally {
-              setIsCreatingRequest(false);
-            }
-          },
-        },
-      ]
-    );
+    if (diffDays < 0) return 'Expirado';
+    if (diffDays === 0) return 'Expira hoje';
+    if (diffDays === 1) return 'Expira amanhã';
+    return `Expira em ${diffDays} dias`;
   };
-  
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'Aguardando orçamento';
+      case 'QUOTED': return 'Orçamento recebido';
+      case 'ACCEPTED': return 'Aceito';
+      case 'REJECTED': return 'Recusado';
+      case 'EXPIRED': return 'Expirado';
+      default: return status;
+    }
+  };
+
+  const handleOpenChat = () => {
+    if (!professionalData || !serviceId) {
+      Alert.alert('Erro', 'Informações não disponíveis.');
+      return;
+    }
+
+    navigation.navigate('Chat', {
+      professionalId: professionalData.id,
+      professionalName: professionalData.name,
+      professionalImage: professionalData.image,
+      serviceId: serviceId,
+      serviceName: serviceName || '',
+      budgetId: currentBudget?.id || budgetId || undefined,
+    });
+  };
+
+  const handleViewAcceptedBudget = () => {
+    if (!professionalData || !budgetId) {
+      Alert.alert('Erro', 'Informações não disponíveis.');
+      return;
+    }
+
+    navigation.navigate('Chat', {
+      professionalId: professionalData.id,
+      professionalName: professionalData.name,
+      professionalImage: professionalData.image,
+      serviceId: serviceId || '',
+      serviceName: serviceName || '',
+      budgetId: budgetId,
+    });
+  };
+
+  // Determinar qual footer mostrar baseado no status do orçamento
+  // QUOTED e ACCEPTED devem mostrar a view de orçamento finalizado
+  const hasAcceptedBudget = (budgetStatus === 'ACCEPTED' || budgetStatus === 'QUOTED') && budgetId && currentBudget && parseFloat(currentBudget.price) > 0;
+  const hasPendingBudget = budgetStatus === 'PENDING' && budgetId && currentBudget;
+  const hasOtherBudgetStatus = budgetStatus && budgetStatus !== 'ACCEPTED' && budgetStatus !== 'QUOTED' && budgetStatus !== 'PENDING';
+
   return (
     <>
       <BudgetRequestModal
@@ -183,50 +157,119 @@ export const Footer: React.FC<FooterProps> = ({
         professionalName={professionalData?.name || ''}
         professionalImage={professionalData?.image || ''}
       />
-      
-      <S.Container>
-        <S.Footer>
-          {/* Mostrar link do orçamento se houver budgetId */}
-          {budgetId && (
-            <S.BudgetLinkContainer>
-              <S.BudgetLink onPress={() => navigation.navigate('BudgetDetail', { budgetId })}>
-                <Ionicons name="document-text-outline" size={20} color={theme.COLORS.SECONDARY} />
-                <S.BudgetLinkText>Ver Orçamento</S.BudgetLinkText>
-              </S.BudgetLink>
-              <S.RefreshBudgetButton onPress={handleRefreshBudget}>
-                <Ionicons name="refresh-outline" size={16} color={theme.COLORS.GREY_60} />
-                <S.RefreshBudgetText>Refazer</S.RefreshBudgetText>
-              </S.RefreshBudgetButton>
-            </S.BudgetLinkContainer>
-          )}
-          
-          <S.PriceButtonContainer>
-            {servicePrice !== 0 && <Price style={{ marginRight: 16 }} priceValue={servicePrice} pricingType={pricingType} />}
 
-            {budgetStatus === 'PENDING' ? (
-              <Button 
-                onPress={() => navigation.navigate('Chat', {
-                  professionalId: professionalData?.id || '',
-                  professionalName: professionalData?.name || '',
-                  professionalImage: professionalData?.image || '',
-                  serviceId: serviceId || '',
-                  serviceName: serviceName || '',
-                  budgetId: budgetId || undefined,
-                })}
-                style={{ backgroundColor: '#FFA500', flex: 1 }}
-              >
-                Aguardando Orçamento...
-              </Button>
-            ) : servicePrice || budgetStatus === 'ACCEPTED' || budgetStatus === 'QUOTED' ? (
-              <Button style={{ flex: 1 }}>Contratar</Button>
-            ) : hasPendingBudget ? (
-              <Button onPress={handleBudgetPress} style={{ backgroundColor: '#FFA500', flex: 1 }}>Aguardando...</Button>
-            ) : (
-              <Button onPress={handleBudgetPress} style={{ flex: 1 }}>Orçar</Button>
+      <S.Footer>
+        {/* Status: ACCEPTED - Orçamento finalizado */}
+        {hasAcceptedBudget && (
+          <S.BudgetFinalizedContainer>
+            <S.BudgetFinalizedHeader>
+              <S.BudgetFinalizedIconContainer>
+                <MaterialIcons name="verified-user" size={20} color={theme.COLORS.PRIMARY} />
+                {/* <Ionicons name="shield-checkmark-outline" size={20} color={theme.COLORS.PRIMARY} /> */}
+              </S.BudgetFinalizedIconContainer>
+              <S.BudgetFinalizedHeaderText>
+                Orçamento finalizado e serviço pronto para você contratar.
+              </S.BudgetFinalizedHeaderText>
+            </S.BudgetFinalizedHeader>
+
+            <S.BudgetFinalizedPriceCard>
+              <S.BudgetFinalizedPriceLabel>Valor orçado do serviço</S.BudgetFinalizedPriceLabel>
+              <S.BudgetFinalizedPrice>R$ {parseFloat(currentBudget.price).toFixed(2).replace('.', ',')}</S.BudgetFinalizedPrice>
+            </S.BudgetFinalizedPriceCard>
+
+            <S.BudgetFinalizedActions>
+            <S.ContractButton onPress={() => {
+                // Navegar para contratar ou executar ação de contratação
+                handleViewAcceptedBudget();
+              }}>
+                <S.ContractButtonText>Contratar</S.ContractButtonText>
+              </S.ContractButton>
+              <S.ViewBudgetButton onPress={handleViewAcceptedBudget}>
+                <S.ViewBudgetButtonText>Visualizar orçamento</S.ViewBudgetButtonText>
+              </S.ViewBudgetButton>
+
+            </S.BudgetFinalizedActions>
+          </S.BudgetFinalizedContainer>
+        )}
+
+        {/* Status: PENDING - Orçamento pendente */}
+        {hasPendingBudget && (
+          <S.BudgetInfoContainer>
+            <S.BudgetContent>
+              {parseFloat(currentBudget.price) > 0 && (
+                <S.BudgetPriceSection>
+                  <S.BudgetPriceLabel>Valor Orçado</S.BudgetPriceLabel>
+                  <S.BudgetPrice>R$ {parseFloat(currentBudget.price).toFixed(2).replace('.', ',')}</S.BudgetPrice>
+                </S.BudgetPriceSection>
+              )}
+
+              {currentBudget.description && currentBudget.description !== 'Solicitação de orçamento' && (
+                <S.BudgetDescription>
+                  {currentBudget.description}
+                </S.BudgetDescription>
+              )}
+
+              <S.StatusInfo>
+                <S.StatusBadge status={currentBudget.status}>
+                  <S.StatusText status={currentBudget.status}>
+                    {getStatusText(currentBudget.status)}
+                  </S.StatusText>
+                </S.StatusBadge>
+                {currentBudget.expiresAt && (
+                  <S.BudgetExpiry>
+                    <Ionicons 
+                      name="time-outline" 
+                      size={16} 
+                      color={theme.COLORS.GREY_60} 
+                    />
+                    <S.BudgetExpiryText>
+                      {formatExpiryDate(currentBudget.expiresAt)}
+                    </S.BudgetExpiryText>
+                  </S.BudgetExpiry>
+                )}
+              </S.StatusInfo>
+
+              <S.InfoText>
+                Um orçamento foi solicitado
+              </S.InfoText>
+              <S.InfoText>
+                O profissional responderá em breve.
+              </S.InfoText>
+            </S.BudgetContent>
+
+            <S.BudgetActions>
+              <S.ChatButton onPress={handleOpenChat}>
+                <S.ChatButtonText>Abrir Conversa</S.ChatButtonText>
+              </S.ChatButton>
+            </S.BudgetActions>
+          </S.BudgetInfoContainer>
+        )}
+
+        {/* Status: Sem orçamento ou outros status - Footer padrão */}
+        {!hasAcceptedBudget && !hasPendingBudget && (
+          <>
+            {servicePrice === 0 && (
+              <S.NoPriceContainer>
+                <S.NoPriceText>
+                  O serviço não possui um preço, solicite o orçamento com o profissional para definir o melhor valor para sua necessidade.
+                </S.NoPriceText>
+              </S.NoPriceContainer>
             )}
-          </S.PriceButtonContainer>
-        </S.Footer>
-      </S.Container>
+
+            <S.PriceButtonContainer>
+              {servicePrice !== 0 && <Price priceValue={parseFloat(servicePrice.toFixed(2).replace('.', ','))} pricingType={pricingType} />}
+
+              {servicePrice !== 0 ? (
+                <Button>Contratar</Button>
+              ) : (
+                <S.RequestBudgetButton onPress={() => setShowBudgetModal(true)}>
+                  <S.RequestBudgetText>Solicitar orçamento</S.RequestBudgetText>
+                </S.RequestBudgetButton>
+              )}
+            </S.PriceButtonContainer>
+          </>
+        )}
+      </S.Footer>
     </>
   );
 };

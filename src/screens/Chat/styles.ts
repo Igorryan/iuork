@@ -70,12 +70,12 @@ export const MessagesList = styled(ScrollView)`
   padding-top: 16px;
 `;
 
-export const MessageWrapper = styled(View)<{ isMine: boolean }>`
+export const MessageWrapper = styled(View) <{ isMine: boolean }>`
   margin-bottom: 16px;
   align-items: ${({ isMine }) => (isMine ? 'flex-end' : 'flex-start')};
 `;
 
-export const MessageBubble = styled(View)<{ isMine: boolean }>`
+export const MessageBubble = styled(View) <{ isMine: boolean }>`
   max-width: 75%;
   padding: 12px 16px;
   border-radius: 20px;
@@ -87,7 +87,7 @@ export const MessageBubble = styled(View)<{ isMine: boolean }>`
   elevation: 2;
 `;
 
-export const MessageText = styled(Text)<{ isMine: boolean }>`
+export const MessageText = styled(Text) <{ isMine: boolean }>`
   font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
   font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
   color: ${({ theme, isMine }) => (isMine ? theme.COLORS.GREY : theme.COLORS.WHITE)};
@@ -102,7 +102,7 @@ export const MessageTime = styled(Text)`
   padding: 0 4px;
 `;
 
-export const AudioMessage = styled(View)<{ isMine: boolean }>`
+export const AudioMessage = styled(View) <{ isMine: boolean }>`
   flex-direction: row;
   align-items: center;
   padding: 12px 16px;
@@ -181,10 +181,21 @@ export const BudgetRequestTitle = styled(Text)`
   line-height: 20px;
 `;
 
+export const BudgetServiceNameButton = styled(TouchableOpacity)`
+  margin-bottom: 24px;
+  gap: 4px;
+`;
+
 export const BudgetServiceName = styled(Text)`
   font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
   font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
   color: ${({ theme }) => theme.COLORS.GREY};
+`;
+
+export const BudgetServiceAccessButtonText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  color: ${({ theme }) => theme.COLORS.BLACK};
 `;
 
 export const BudgetResponseContainer = styled(View)`
@@ -312,8 +323,8 @@ export const EmptyStateContainer = styled(View)`
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
-  min-height: 200px;
+  padding: 20px 0 0;
+
 `;
 
 export const EmptyStateText = styled(Text)`
@@ -363,5 +374,111 @@ export const DisabledText = styled(Text)`
   color: ${({ theme }) => theme.COLORS.GREY_60};
   text-align: center;
   padding: 12px 16px;
+`;
+
+// Mensagem de início do orçamento
+export const BudgetInfoMessage = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+`;
+
+export const BudgetInfoIcon = styled(Text)`
+  font-size: 20px;
+  margin-right: 8px;
+`;
+
+export const BudgetInfoText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_40};
+  text-align: center;
+`;
+
+// Mensagem de orçamento finalizado
+export const BudgetClosedContainer = styled(View)`
+  background-color: ${({ theme }) => theme.COLORS.WHITE};
+  border-top-width: 1px;
+  border-top-color: ${({ theme }) => theme.COLORS.GREY_20};
+  padding: 20px 24px;
+`;
+
+export const BudgetClosedIcon = styled(Text)`
+  font-size: 16px;
+  margin-right: 6px;
+`;
+
+export const TitleText = styled(Text)`  
+  font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
+  font-size: ${({ theme }) => theme.FONT_SIZE.LG}px;
+  color: ${({ theme }) => theme.COLORS.BLACK};
+  margin-top: 4px;
+`;
+
+export const BudgetTitleContainer = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+`;
+
+export const BudgetClosedTitle = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_60};
+  margin-bottom: 4px;
+  margin-top: 4px;
+  text-align: center;
+`;
+
+export const BudgetClosedText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_60};
+`;
+
+export const BudgetContractContainer = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+`;
+
+export const BudgetPriceContainer = styled(View)`
+`;
+
+export const RefreshBudgetButton = styled(TouchableOpacity)`
+  margin-bottom: 24px;
+  gap: 4px;
+`;
+
+export const RefreshBudgetText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
+  color: ${({ theme }) => theme.COLORS.GREY};
+  text-decoration: underline;
+`;
+
+export const BudgetClosedPrice = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
+  font-size: 22px;
+  color: ${({ theme }) => theme.COLORS.GREY};
+`;
+
+export const BudgetContractButton = styled(TouchableOpacity)`
+  flex: 1;
+  padding: 16px;
+  background-color: ${({ theme }) => theme.COLORS.BLACK};
+  border-radius: 24px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const BudgetContractButtonText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
+  color: ${({ theme }) => theme.COLORS.WHITE};
 `;
 

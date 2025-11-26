@@ -15,9 +15,10 @@ import { RootStackParamList } from '@routes/stack.routes';
 type HeaderProps = {
   name: string;
   image: string;
+  overlay?: boolean;
 };
 
-export const Header: React.FC<HeaderProps> = ({ name, image }) => {
+export const Header: React.FC<HeaderProps> = ({ name, image, overlay = false }) => {
   // hooks
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
@@ -32,8 +33,10 @@ export const Header: React.FC<HeaderProps> = ({ name, image }) => {
   // effects
 
   // renders
+  const ContainerComponent = overlay ? S.OverlayContainer : S.Container;
+  
   return (
-    <S.Container activeOpacity={0.9} onPress={() => navigation.goBack()}>
+    <ContainerComponent activeOpacity={0.9} onPress={() => navigation.goBack()}>
       <S.BackIcon name="arrow-left" size={24} />
 
       <S.ProfessionalNameText>{name}</S.ProfessionalNameText>
@@ -43,6 +46,6 @@ export const Header: React.FC<HeaderProps> = ({ name, image }) => {
           uri: image,
         }}
       />
-    </S.Container>
+    </ContainerComponent>
   );
 };

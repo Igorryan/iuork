@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 // styles
 import * as S from './styles';
 
 // libs
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@routes/stack.routes';
-import { Alert } from 'react-native';
+import { Alert, StatusBar, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // application
 import { RatingView } from '@components/RatingView';
@@ -19,10 +20,10 @@ import { getAcceptedBudget, getPendingBudget, getBudgetWithPrice, Budget, create
 // types
 import { Header } from './Header';
 import { Details } from './Details';
-import { PhotosGrid } from './PhotosGrid';
+import { PhotosCarousel } from './PhotosCarousel';
 import { Section } from './Section';
 import { Footer } from './Footer';
-import { Review as IReview, Service as IService } from '@types/domain';
+import { Review as IReview, Service as IService } from '../../../types/domain';
 import { getReviewsFromService } from '@api/callbacks/review';
 import { getServiceFromId } from '@api/callbacks/service';
 import { useSocket } from '@hooks/useSocket';
@@ -46,6 +47,7 @@ export const ServiceDetail: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const socket = useSocket();
+  const insets = useSafeAreaInsets();
 
   // refs
 
@@ -100,15 +102,8 @@ export const ServiceDetail: React.FC = () => {
         
         // Verificar se é para este serviço
         if (data.serviceId === route.params.serviceId) {
-          const price = parseFloat(data.price);
-          
-          // Se o preço foi definido (> 0), atualizar
-          if (price > 0) {
-            setAcceptedBudgetPrice(price);
-            setHasPendingBudget(false);
-            setCurrentBudget(data);
-            console.log('✅ [SERVICE_DETAIL] Preço atualizado: R$', price);
-          }
+          // Recarregar orçamentos para garantir que o status está atualizado
+          loadBudgets();
         }
       };
 
@@ -118,40 +113,55 @@ export const ServiceDetail: React.FC = () => {
         socket.off('new-budget', handleNewBudget);
       };
     }
-  }, [socket, user?.id, route.params.serviceId]);
+  }, [socket, user?.id, route.params.serviceId, loadBudgets]);
+
+  // Função para carregar orçamentos
+  const loadBudgets = useCallback(async () => {
+    if (!user?.id) return;
+    
+    const [acceptedBudget, pendingBudget, budgetWithPrice] = await Promise.all([
+      getAcceptedBudget(route.params.serviceId, user.id),
+      getPendingBudget(route.params.serviceId, user.id),
+      getBudgetWithPrice(route.params.serviceId, user.id),
+    ]);
+    
+    if (acceptedBudget) {
+      setAcceptedBudgetPrice(parseFloat(acceptedBudget.price));
+      setCurrentBudget(acceptedBudget);
+      setHasPendingBudget(false);
+      console.log('✅ [SERVICE_DETAIL] Orçamento aceito encontrado:', acceptedBudget.id);
+    } else if (budgetWithPrice) {
+      // Se tem orçamento com preço definido mas ainda pendente
+      setAcceptedBudgetPrice(parseFloat(budgetWithPrice.price));
+      setCurrentBudget(budgetWithPrice);
+      setHasPendingBudget(false);
+      console.log('✅ [SERVICE_DETAIL] Orçamento com preço encontrado:', budgetWithPrice.id);
+    } else if (pendingBudget) {
+      // Se tem orçamento pendente (aguardando profissional definir preço)
+      setAcceptedBudgetPrice(null);
+      setHasPendingBudget(true);
+      setCurrentBudget(pendingBudget);
+      console.log('✅ [SERVICE_DETAIL] Orçamento pendente encontrado:', pendingBudget.id);
+    } else {
+      // Não há orçamento
+      setAcceptedBudgetPrice(null);
+      setHasPendingBudget(false);
+      setCurrentBudget(null);
+    }
+  }, [route.params.serviceId, user?.id]);
 
   // Buscar orçamento aceito para este serviço e cliente
   useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      if (!user?.id) return;
-      
-      const [acceptedBudget, pendingBudget, budgetWithPrice] = await Promise.all([
-        getAcceptedBudget(route.params.serviceId, user.id),
-        getPendingBudget(route.params.serviceId, user.id),
-        getBudgetWithPrice(route.params.serviceId, user.id),
-      ]);
-      
-      if (acceptedBudget && isMounted) {
-        setAcceptedBudgetPrice(parseFloat(acceptedBudget.price));
-        setCurrentBudget(acceptedBudget);
-        console.log('✅ [SERVICE_DETAIL] Orçamento aceito encontrado:', acceptedBudget.id);
-      } else if (budgetWithPrice && isMounted) {
-        // Se tem orçamento com preço definido mas ainda pendente
-        setAcceptedBudgetPrice(parseFloat(budgetWithPrice.price));
-        setCurrentBudget(budgetWithPrice);
-        console.log('✅ [SERVICE_DETAIL] Orçamento com preço encontrado:', budgetWithPrice.id);
-      } else if (pendingBudget && isMounted) {
-        // Se tem orçamento pendente (aguardando profissional definir preço)
-        setHasPendingBudget(true);
-        setCurrentBudget(pendingBudget);
-        console.log('✅ [SERVICE_DETAIL] Orçamento pendente encontrado:', pendingBudget.id);
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, [route.params.serviceId, user?.id]);
+    loadBudgets();
+  }, [loadBudgets]);
+
+  // Recarregar orçamentos quando a tela recebe foco
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🔄 [SERVICE_DETAIL] Tela recebeu foco - Recarregando orçamentos');
+      loadBudgets();
+    }, [loadBudgets])
+  );
 
   // callbacks
   const handleRequestNewBudget = async () => {
@@ -203,21 +213,40 @@ export const ServiceDetail: React.FC = () => {
   // renders
   return (
     <S.Container>
+      <StatusBar barStyle="dark-content" translucent={false} />
       {service && (
         <>
-          <Header
-            name={route.params.professionalData.name}
-            image={route.params.professionalData.image}
-          />
+          {service.images && service.images.length > 0 && (
+            <S.HeaderFixed style={{ paddingTop: insets.top }}>
+              <Header
+                name={route.params.professionalData.name}
+                image={route.params.professionalData.image}
+                overlay={true}
+              />
+            </S.HeaderFixed>
+          )}
+          
+          {(!service.images || service.images.length === 0) && (
+            <S.HeaderWithSafeArea style={{ paddingTop: Math.max(insets.top, Platform.OS === 'android' ? 40 : 0) }}>
+              <Header
+                name={route.params.professionalData.name}
+                image={route.params.professionalData.image}
+                overlay={false}
+              />
+            </S.HeaderWithSafeArea>
+          )}
 
           <S.Content>
+            {service.images && service.images.length > 0 && (
+              <S.CarouselWrapper >
+                <PhotosCarousel serviceImages={service.images} />
+              </S.CarouselWrapper>
+            )}
+
             <S.Header>
               <Details name={service.name} description={service.description} />
             </S.Header>
 
-            <S.Divider />
-
-            <PhotosGrid serviceImages={service.images} />
             <S.Divider />
 
             {reviews.length > 0 && (
@@ -249,6 +278,7 @@ export const ServiceDetail: React.FC = () => {
         hasPendingBudget={hasPendingBudget}
         budgetId={currentBudget?.id || null}
         budgetStatus={currentBudget?.status}
+        currentBudget={currentBudget}
       />
     </S.Container>
   );

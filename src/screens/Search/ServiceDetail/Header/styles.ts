@@ -25,6 +25,24 @@ export const Container = styled(TouchableOpacity)`
   padding-top: ${Platform.OS === 'android' ? 40 : 0}px;
 `;
 
+export const OverlayContainer = styled(TouchableOpacity)`
+  left: 0;
+
+  width: 100%;
+
+  z-index: 1;
+
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 6px 20px;
+
+  background-color: rgba(255, 255, 255, 0.95);
+
+  padding-top: ${Platform.OS === 'android' ? 40 : 0}px;
+`;
+
 export const BackIcon = styled(Feather)``;
 
 export const ProfessionalNameText = styled(Text)`

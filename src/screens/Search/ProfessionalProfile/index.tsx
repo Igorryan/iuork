@@ -52,6 +52,7 @@ export const ProfessionalProfile: React.FC = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [acceptedBudgets, setAcceptedBudgets] = useState<Map<string, number>>(new Map());
   const [pendingBudgets, setPendingBudgets] = useState<Set<string>>(new Set());
+  const [receivedBudgets, setReceivedBudgets] = useState<Set<string>>(new Set());
   const socket = useSocket();
   // refs
   const sliderAnimation = useRef(new Animated.Value(0)).current;
@@ -104,6 +105,13 @@ export const ProfessionalProfile: React.FC = () => {
             return updated;
           });
           
+          // Marcar como orçamento recebido
+          setReceivedBudgets((prev) => {
+            const updated = new Set(prev);
+            updated.add(serviceId);
+            return updated;
+          });
+          
           // Remover de pendentes já que agora tem preço
           setPendingBudgets((prev) => {
             const updated = new Set(prev);
@@ -127,6 +135,7 @@ export const ProfessionalProfile: React.FC = () => {
 
     const budgetsMap = new Map<string, number>();
     const pendingSet = new Set<string>();
+    const receivedSet = new Set<string>();
     
     // Buscar orçamento aceito, pendente e com preço para cada serviço
     await Promise.all(
@@ -139,12 +148,14 @@ export const ProfessionalProfile: React.FC = () => {
         
         if (acceptedBudget) {
           budgetsMap.set(service.id, parseFloat(acceptedBudget.price));
+          receivedSet.add(service.id); // ACCEPTED também é um orçamento recebido
         } else if (budgetWithPrice) {
-          // Se tem orçamento com preço definido mas ainda pendente
+          // Se tem orçamento com preço definido (QUOTED)
           budgetsMap.set(service.id, parseFloat(budgetWithPrice.price));
+          receivedSet.add(service.id); // QUOTED é um orçamento recebido
         }
         
-        if (pendingBudget) {
+        if (pendingBudget && !budgetWithPrice) {
           // Apenas marca como pendente se ainda não tem preço
           pendingSet.add(service.id);
         }
@@ -153,6 +164,7 @@ export const ProfessionalProfile: React.FC = () => {
     
     setAcceptedBudgets(budgetsMap);
     setPendingBudgets(pendingSet);
+    setReceivedBudgets(receivedSet);
   }, [user?.id, services]);
 
   // Carregar orçamentos quando services ou user mudar
@@ -324,6 +336,7 @@ export const ProfessionalProfile: React.FC = () => {
                   professionalData={{ id: professional.userId, name: professional.name, image: professional.image }}
                   acceptedBudgetPrice={acceptedBudgets.get(service.id)}
                   hasPendingBudget={pendingBudgets.has(service.id)}
+                  hasReceivedBudget={receivedBudgets.has(service.id)}
                 />
               ))}
             </S.ServiceContainer>

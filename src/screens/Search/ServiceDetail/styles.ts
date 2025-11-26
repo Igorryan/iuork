@@ -6,6 +6,8 @@ import {
   SafeAreaView,
   ScrollView,
   Dimensions,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -71,3 +73,21 @@ export const ViewMoreText = styled(Text)`
 export const Assessments = styled(View)`
   padding: 0 20px;
 `;
+
+export const HeaderFixed = styled(View)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+`;
+
+export const HeaderWithSafeArea = styled(View)`
+  width: 100%;
+`;
+
+export const CarouselWrapper = styled(View)`
+  width: 100%;
+  margin-top: 48px;
+`;
+

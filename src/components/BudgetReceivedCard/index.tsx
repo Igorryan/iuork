@@ -1,4 +1,5 @@
 import React from 'react';
+import { TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import theme from '@theme/index';
@@ -8,12 +9,14 @@ interface BudgetReceivedCardProps {
   budget: Budget;
   serviceName: string;
   professionalName: string;
+  onContract?: () => void;
 }
 
 export const BudgetReceivedCard: React.FC<BudgetReceivedCardProps> = ({
   budget,
   serviceName,
   professionalName,
+  onContract,
 }) => {
   const formatExpiryDate = (dateString: string | null) => {
     if (!dateString) return null;
@@ -28,13 +31,6 @@ export const BudgetReceivedCard: React.FC<BudgetReceivedCardProps> = ({
     if (diffDays === 1) return 'Expira amanhã';
     return `Expira em ${diffDays} dias`;
   };
-
-  const isExpired = budget.expiresAt && new Date(budget.expiresAt) < new Date();
-
-  // Não mostrar se já foi respondido ou expirado
-  if (budget.status !== 'PENDING' && budget.status !== 'QUOTED' || isExpired) {
-    return null;
-  }
 
   // Se o preço ainda é 0, não mostrar (ainda não foi definido pelo profissional)
   if (parseFloat(budget.price) === 0) {
@@ -76,6 +72,12 @@ export const BudgetReceivedCard: React.FC<BudgetReceivedCardProps> = ({
           <ExpiryText>{formatExpiryDate(budget.expiresAt)}</ExpiryText>
         </ExpiryInfo>
       )}
+
+      {onContract && (
+        <ContractButton onPress={onContract}>
+          <ContractButtonText>Contratar</ContractButtonText>
+        </ContractButton>
+      )}
     </Container>
   );
 };
@@ -84,13 +86,14 @@ const Container = styled.View`
   background-color: ${({ theme }) => theme.COLORS.WHITE};
   border-radius: 12px;
   padding: 16px;
-  margin: 12px 16px;
   shadow-color: ${({ theme }) => theme.COLORS.SHADOW};
   shadow-offset: 0px 2px;
   shadow-opacity: 0.1;
   shadow-radius: 4px;
   elevation: 3;
   border: 2px solid ${({ theme }) => theme.COLORS.SECONDARY};
+  max-width: 75%;
+  margin: 0;
 `;
 
 const Header = styled.View`
@@ -191,4 +194,19 @@ const ExpiryText = styled.Text`
   font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
   font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
   color: ${({ theme }) => theme.COLORS.GREY_60};
+`;
+
+const ContractButton = styled.TouchableOpacity`
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: ${({ theme }) => theme.COLORS.PRIMARY};
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ContractButtonText = styled.Text`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
+  color: ${({ theme }) => theme.COLORS.WHITE};
 `;

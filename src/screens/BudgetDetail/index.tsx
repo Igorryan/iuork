@@ -7,8 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import theme from '@theme/index';
 import * as S from './styles';
 import { api } from '@config/api';
-import { Budget } from '@api/callbacks/budget';
+import { Budget, cancelBudget, createBudgetRequest } from '@api/callbacks/budget';
 import { Button } from '@components/Button';
+import { useAuth } from '@hooks/auth';
 
 type BudgetDetailRouteParamList = {
   BudgetDetail: {
@@ -19,8 +20,10 @@ type BudgetDetailRouteParamList = {
 export const BudgetDetail: React.FC = () => {
   const route = useRoute<RouteProp<BudgetDetailRouteParamList, 'BudgetDetail'>>();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { user } = useAuth();
   const [budget, setBudget] = useState<Budget | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     loadBudget();
@@ -104,6 +107,70 @@ export const BudgetDetail: React.FC = () => {
     });
   };
 
+  const handleRefreshBudget = async () => {
+    if (!budget || !user?.id) return;
+
+    Alert.alert(
+      'Refazer Orçamento',
+      'Deseja realmente cancelar o orçamento atual e solicitar um novo? Esta ação não pode ser desfeita.',
+      [
+        {
+          text: 'Não',
+          style: 'cancel',
+        },
+        {
+          text: 'Sim, Refazer',
+          style: 'destructive',
+          onPress: async () => {
+            setIsRefreshing(true);
+            
+            try {
+              // 1. Cancelar orçamento atual
+              const cancelled = await cancelBudget(budget.id);
+              
+              if (!cancelled) {
+                throw new Error('Falha ao cancelar orçamento');
+              }
+
+              console.log('✅ Orçamento anterior cancelado:', budget.id);
+
+              // 2. Criar novo orçamento (retorna com dados do chat)
+              const newBudget = await createBudgetRequest(
+                user.id, 
+                budget.chat.professionalId, 
+                budget.serviceId
+              );
+              
+              if (!newBudget || !newBudget.chat) {
+                throw new Error('Falha ao criar novo orçamento');
+              }
+
+              console.log('✅ Novo orçamento criado:', newBudget.id);
+
+              // 3. Navegar para o chat do NOVO orçamento
+              navigation.navigate('Chat', {
+                professionalId: newBudget.chat.professionalId,
+                professionalName: newBudget.chat.professional.name,
+                professionalImage: newBudget.chat.professional.avatarUrl || '',
+                serviceId: newBudget.serviceId,
+                serviceName: newBudget.chat.service?.title || 'Serviço',
+                budgetId: newBudget.id,
+                sendBudgetRequest: true,
+              });
+
+              Alert.alert('Sucesso', 'Novo orçamento solicitado com sucesso!');
+            } catch (error) {
+              console.error('Erro ao refazer orçamento:', error);
+              Alert.alert('Erro', 'Não foi possível refazer o orçamento. Tente novamente.');
+            } finally {
+              setIsRefreshing(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <S.Container>
       <S.Header>
@@ -185,6 +252,11 @@ export const BudgetDetail: React.FC = () => {
           <Button onPress={handleOpenChat}>
             Abrir Conversa
           </Button>
+
+          <S.RefreshButton onPress={handleRefreshBudget} disabled={isRefreshing}>
+            <Ionicons name="refresh-outline" size={20} color={theme.COLORS.GREY_60} />
+            <S.RefreshButtonText>{isRefreshing ? 'Refazendo...' : 'Refazer Orçamento'}</S.RefreshButtonText>
+          </S.RefreshButton>
         </S.Card>
       </S.Content>
     </S.Container>

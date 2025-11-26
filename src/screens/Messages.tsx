@@ -130,8 +130,13 @@ const Messages: React.FC = () => {
         }
       };
 
-      // Ouvir atualizações de chat list (orçamento atualizado)
-      const handleChatListUpdate = (data: { chatId: string; budget: any }) => {
+      // Ouvir atualizações de chat list (nova mensagem ou orçamento atualizado)
+      const handleChatListUpdate = (data: { 
+        chatId: string; 
+        lastMessageAt?: string | Date;
+        lastMessage?: { content: string; senderId: string; createdAt: string };
+        budget?: any;
+      }) => {
         console.log('🔄 [CLIENTE] Atualização de chat recebida:', data);
         
         setChats((prev) => {
@@ -145,6 +150,21 @@ const Messages: React.FC = () => {
 
           const updatedChats = [...prev];
           const chat = { ...updatedChats[chatIndex] };
+          
+          // Atualizar última mensagem se fornecida
+          if (data.lastMessage) {
+            chat.lastMessageAt = data.lastMessageAt || data.lastMessage.createdAt;
+            chat.messages = [data.lastMessage];
+            
+            // Atualizar contador de não lidas (se a mensagem não é minha)
+            if (data.lastMessage.senderId !== user.id && chat._count) {
+              chat._count.messages = (chat._count.messages || 0) + 1;
+            }
+            
+            // Remover chat da posição atual e adicionar no topo
+            updatedChats.splice(chatIndex, 1);
+            return [chat, ...updatedChats];
+          }
           
           // Atualizar budget se fornecido
           if (data.budget) {
@@ -191,12 +211,22 @@ const Messages: React.FC = () => {
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
     
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    if (diffInMinutes < 1) {
+      return 'Agora';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} min`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}d`;
+    } else {
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
     }
-    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
   };
 
   const getLastMessagePreview = (chat: Chat) => {
@@ -205,17 +235,19 @@ const Messages: React.FC = () => {
     }
     
     const lastMessage = chat.messages[0];
+    const isMine = lastMessage.senderId === user?.id;
+    const prefix = isMine ? 'Você: ' : '';
     
-    if (lastMessage.messageType === 'IMAGE') return '📷 Imagem';
-    if (lastMessage.messageType === 'AUDIO') return '🎤 Áudio';
-    return lastMessage.content || '';
+    if (lastMessage.messageType === 'IMAGE') return `${prefix}📷 Imagem`;
+    if (lastMessage.messageType === 'AUDIO') return `${prefix}🎤 Áudio`;
+    return `${prefix}${lastMessage.content || ''}`;
   };
 
   const getBudgetStatusLabel = (status: string) => {
     const labels: { [key: string]: string } = {
       PENDING: 'Aguardando',
-      QUOTED: 'Aceito', // Mantido para compatibilidade
-      ACCEPTED: 'Aceito',
+      QUOTED: 'Orçamento recebido',
+      ACCEPTED: 'Orçamento recebido',
       REJECTED: 'Cancelado',
       EXPIRED: 'Expirado',
     };
@@ -231,6 +263,28 @@ const Messages: React.FC = () => {
       EXPIRED: theme.COLORS.GREY_40,
     };
     return colors[status] || theme.COLORS.GREY_40;
+  };
+
+  const getChatStatuses = (chat: Chat, unreadCount: number) => {
+    const statuses: Array<{ color: string; label: string }> = [];
+    
+    // Sempre mostrar status do orçamento se existir
+    if (chat.budget) {
+      statuses.push({
+        color: getBudgetStatusColor(chat.budget.status),
+        label: getBudgetStatusLabel(chat.budget.status),
+      });
+    }
+    
+    // Adicionar mensagens não lidas ao lado se houver
+    if (unreadCount > 0) {
+      statuses.push({
+        color: theme.COLORS.SECONDARY,
+        label: unreadCount.toString(),
+      });
+    }
+    
+    return statuses.length > 0 ? statuses : null;
   };
 
   if (isLoading) {
@@ -290,50 +344,29 @@ const Messages: React.FC = () => {
                   )}
                   
                   <ChatContent>
-                    <ChatHeader>
+                    <NameRow>
                       <ProfessionalName numberOfLines={1}>
                         {chat.professional?.name || 'Profissional'}
                       </ProfessionalName>
-                      <TimeText>{formatTime(chat.lastMessageAt)}</TimeText>
-                    </ChatHeader>
-                    
-                    <ServiceRow>
-                      <ServiceLabel>Serviço:</ServiceLabel>
-                      <ServiceName numberOfLines={1}>
-                        {chat.service?.title || 'Sem serviço'}
-                      </ServiceName>
-                    </ServiceRow>
-                    
-                    {chat.budget && (
-                      <BudgetStatusRow>
-                        <BudgetStatusBadge statusColor={getBudgetStatusColor(chat.budget.status)}>
-                          <BudgetStatusText>
-                            {getBudgetStatusLabel(chat.budget.status)}
-                          </BudgetStatusText>
-                        </BudgetStatusBadge>
-                        {chat.budget.price !== '0' && (
-                          <BudgetPriceText>
-                            R$ {parseFloat(chat.budget.price).toFixed(2)}
-                          </BudgetPriceText>
-                        )}
-                      </BudgetStatusRow>
-                    )}
+                      {getChatStatuses(chat, unreadCount) && (
+                        <StatusTagsContainer>
+                          {getChatStatuses(chat, unreadCount)!.map((status, index) => (
+                            <StatusTag key={index} statusColor={status.color}>
+                              <StatusTagText>
+                                {status.label}
+                              </StatusTagText>
+                            </StatusTag>
+                          ))}
+                        </StatusTagsContainer>
+                      )}
+                    </NameRow>
                     
                     <MessageRow>
                       <LastMessage numberOfLines={1} hasUnread={unreadCount > 0}>
-                        {getLastMessagePreview(chat)}
+                        {getLastMessagePreview(chat)} • {formatTime(chat.lastMessageAt)}
                       </LastMessage>
-                      {unreadCount > 0 && (
-                        <UnreadBadge>
-                          <UnreadText>{unreadCount}</UnreadText>
-                        </UnreadBadge>
-                      )}
                     </MessageRow>
                   </ChatContent>
-                  
-                  <ChevronIcon>
-                    <Ionicons name="chevron-forward" size={20} color={theme.COLORS.GREY_40} />
-                  </ChevronIcon>
                 </ChatCard>
               );
             })}
@@ -458,45 +491,40 @@ const ChatContent = styled.View`
   justify-content: center;
 `;
 
-const ChatHeader = styled.View`
+const NameRow = styled.View`
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 4px;
 `;
 
 const ProfessionalName = styled.Text`
-  color: ${theme.COLORS.PRIMARY};
+  color: ${theme.COLORS.BLACK};
   font-family: ${theme.FONT_FAMILY.BOLD};
   font-size: ${theme.FONT_SIZE.MD}px;
   flex: 1;
+  margin-right: 8px;
 `;
 
-const TimeText = styled.Text`
-  color: ${theme.COLORS.GREY_60};
-  font-family: ${theme.FONT_FAMILY.REGULAR};
-  font-size: 12px;
-  margin-left: 8px;
-`;
-
-const ServiceRow = styled.View`
+const StatusTagsContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 6px;
+  gap: 6px;
 `;
 
-const ServiceLabel = styled.Text`
-  color: ${theme.COLORS.GREY_60};
-  font-family: ${theme.FONT_FAMILY.REGULAR};
-  font-size: 12px;
-  margin-right: 4px;
+const StatusTag = styled.View<{ statusColor: string }>`
+  background-color: ${props => props.statusColor};
+  border-radius: 12px;
+  padding: 4px 10px;
+  min-width: 24px;
+  align-items: center;
+  justify-content: center;
 `;
 
-const ServiceName = styled.Text`
-  color: ${theme.COLORS.SECONDARY};
-  font-family: ${theme.FONT_FAMILY.MEDIUM};
-  font-size: 12px;
-  flex: 1;
+const StatusTagText = styled.Text`
+  color: ${theme.COLORS.WHITE};
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: 11px;
 `;
 
 const MessageRow = styled.View`
@@ -510,51 +538,5 @@ const LastMessage = styled.Text<{ hasUnread: boolean }>`
   font-family: ${props => props.hasUnread ? theme.FONT_FAMILY.MEDIUM : theme.FONT_FAMILY.REGULAR};
   font-size: 14px;
   flex: 1;
-`;
-
-const UnreadBadge = styled.View`
-  background-color: ${theme.COLORS.SECONDARY};
-  border-radius: 10px;
-  padding: 2px 8px;
-  min-width: 20px;
-  align-items: center;
-  justify-content: center;
-  margin-left: 8px;
-`;
-
-const UnreadText = styled.Text`
-  color: ${theme.COLORS.WHITE};
-  font-family: ${theme.FONT_FAMILY.BOLD};
-  font-size: 11px;
-`;
-
-const ChevronIcon = styled.View`
-  margin-left: 8px;
-`;
-
-const BudgetStatusRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-`;
-
-const BudgetStatusBadge = styled.View<{ statusColor: string }>`
-  background-color: ${props => props.statusColor}20;
-  border-radius: 6px;
-  padding: 4px 8px;
-  border: 1px solid ${props => props.statusColor};
-`;
-
-const BudgetStatusText = styled.Text`
-  color: ${theme.COLORS.PRIMARY};
-  font-family: ${theme.FONT_FAMILY.BOLD};
-  font-size: 11px;
-`;
-
-const BudgetPriceText = styled.Text`
-  color: ${theme.COLORS.SECONDARY};
-  font-family: ${theme.FONT_FAMILY.BOLD};
-  font-size: 13px;
 `;
 

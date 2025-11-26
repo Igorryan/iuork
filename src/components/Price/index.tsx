@@ -31,14 +31,12 @@ export const Price: React.FC<PriceProps> = ({ priceValue, pricingType, ...rest }
   return (
     <S.Container {...rest}>
       <S.ServicePriceContainer>
-        <S.ServicePriceTitle>Preço</S.ServicePriceTitle>
-        <S.ValuePriceContainer>
-          <S.ServicePriceSymbol>R$ </S.ServicePriceSymbol>
-          <S.ServicePriceValue>
-            {priceValue}
-            {pricingType === 'HOURLY' ? ' / hora' : pricingType === 'FIXED' ? ' (fixo)' : ''}
-          </S.ServicePriceValue>
-        </S.ValuePriceContainer>
+        <S.ServicePriceValue>
+          {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(priceValue)}
+        </S.ServicePriceValue>
+        <S.ServicePriceTitle>
+          {pricingType === 'HOURLY' ? 'Por hora' : pricingType === 'FIXED' ? 'Por serviço' : 'Orçamento'}
+        </S.ServicePriceTitle>
       </S.ServicePriceContainer>
     </S.Container>
   );

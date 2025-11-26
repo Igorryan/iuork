@@ -209,6 +209,50 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
     return now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Enviar mensagem de texto diretamente sem usar inputText
+  const sendMessageDirectly = async (messageText: string) => {
+    if (!messageText.trim()) return;
+
+    const tempId = generateMessageId();
+    const tempMessage: ChatMessage = {
+      id: tempId,
+      text: messageText.trim(),
+      time: getFormattedTime(),
+      isMine: true,
+      timestamp: Date.now(),
+    };
+
+    // Adicionar mensagem otimisticamente
+    setMessages((prev) => [...prev, tempMessage]);
+
+    try {
+      // Garantir que o chat existe (criará se necessário)
+      const currentChatId = await ensureChatExists();
+      if (!currentChatId) {
+        throw new Error('Não foi possível criar o chat');
+      }
+
+      const sentMessage = await apiSendMessage({
+        chatId: currentChatId,
+        senderId: userId,
+        content: messageText.trim(),
+        messageType: 'TEXT',
+      });
+
+      if (sentMessage) {
+        // Atualizar com a mensagem real da API
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === tempId ? convertAPIMessageToLocal(sentMessage) : msg))
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      // Remover mensagem em caso de erro
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+      Alert.alert('Erro', 'Não foi possível enviar a mensagem.');
+    }
+  };
+
   // Enviar mensagem de texto
   const sendTextMessage = async () => {
     if (!inputText.trim()) return;
@@ -511,6 +555,7 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
     isLoadingChat,
     chatId,
     sendTextMessage,
+    sendMessageDirectly,
     pickImage,
     takePhoto,
     startRecording,

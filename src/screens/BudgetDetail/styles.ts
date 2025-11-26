@@ -138,3 +138,22 @@ export const Divider = styled(View)`
   margin: 16px 0;
 `;
 
+export const RefreshButton = styled(TouchableOpacity)<{ disabled?: boolean }>`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  background-color: ${({ theme }) => theme.COLORS.WHITE};
+  border-radius: 10px;
+  border: 1px solid ${({ theme }) => theme.COLORS.GREY_40};
+  opacity: ${({ disabled }) => disabled ? 0.5 : 1};
+`;
+
+export const RefreshButtonText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_60};
+`;
+
