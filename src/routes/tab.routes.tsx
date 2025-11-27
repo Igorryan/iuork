@@ -7,16 +7,14 @@ import { MapScreen } from '@screens/Search/Home';
 import { useRef, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getLastSearch, clearLastSearch } from '@functions/searchStorage';
-import { useFocusEffect } from '@react-navigation/native';
-import { Home } from '@screens/Home';
+import { clearLastSearch } from '@functions/searchStorage';
 import Favorites from '@screens/Favorites';
 import Services from '@screens/Services';
 import Messages from '@screens/Messages';
 import Profile from '@screens/Profile';
 
 export type RootTabParamList = {
-  SearchTab: undefined;
+  HomeTab: undefined;
   FavoritesTab: undefined;
   ServicesTab: undefined;
   MessagesTab: undefined;
@@ -25,21 +23,9 @@ export type RootTabParamList = {
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-const SearchTabEntry: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
-  const [hasSearch, setHasSearch] = useState(false);
-  useFocusEffect(
-    React.useCallback(() => {
-      let mounted = true;
-      (async () => {
-        const last = await getLastSearch();
-        if (mounted) setHasSearch(!!(last && last.keyword && last.keyword.trim().length > 0));
-      })();
-      return () => {
-        mounted = false;
-      };
-    }, [refreshKey])
-  );
-  return hasSearch ? <MapScreen /> : <Home />;
+// Componente separado para melhor compatibilidade com Fast Refresh
+const HomeTabScreen: React.FC = () => {
+  return <MapScreen />;
 };
 
 export const TabRoutes: React.FC = () => {
@@ -64,41 +50,60 @@ export const TabRoutes: React.FC = () => {
         tabBarLabelStyle: { fontSize: 12, marginBottom: 4 },
         tabBarIcon: ({ color }) => {
           let iconName: string = 'search-outline';
-          if (route.name === 'FavoritesTab') iconName = 'heart-outline';
+          if (route.name === 'HomeTab') iconName = 'home-outline';
           if (route.name === 'ServicesTab') iconName = 'briefcase-outline';
-          if (route.name === 'MessagesTab') iconName = 'chatbubble-ellipses-outline';
+          if (route.name === 'MessagesTab') iconName = 'chatbubbles-outline';
           if (route.name === 'ProfileTab') iconName = 'person-outline';
           return <Ionicons name={iconName as any} size={20} color={color} />;
         },
       })}
     >
       <Tab.Screen
-        name="SearchTab"
-        children={() => <SearchTabEntry refreshKey={refreshKey} />}
+        name="HomeTab"
+        component={HomeTabScreen}
         options={{
-          title: 'Pesquisar',
-          tabBarButton: (props) => (
+          title: 'Início',
+          tabBarButton: (props) => {
+            // Criar objeto limpo apenas com propriedades necessárias e compatíveis
+            const cleanProps: any = {
+              style: props.style,
+              accessibilityLabel: props.accessibilityLabel,
+              accessibilityRole: props.accessibilityRole,
+              accessibilityState: props.accessibilityState,
+              testID: props.testID,
+              children: props.children,
+            };
+            
+            // Adicionar propriedades opcionais apenas se não forem null
+            if (props.delayLongPress != null) cleanProps.delayLongPress = props.delayLongPress;
+            if (props.disabled != null) cleanProps.disabled = props.disabled;
+            if (props.onBlur != null) cleanProps.onBlur = props.onBlur;
+            if (props.onFocus != null) cleanProps.onFocus = props.onFocus;
+            if (props.onLongPress != null) cleanProps.onLongPress = props.onLongPress;
+            if (props.onPressIn != null) cleanProps.onPressIn = props.onPressIn;
+            if (props.onPressOut != null) cleanProps.onPressOut = props.onPressOut;
+            
+            return (
             <TouchableOpacity
-              {...props}
-              onPress={async () => {
+                {...cleanProps}
+                onPress={async (event) => {
                 const now = Date.now();
                 if (now - lastPressRef.current < 300) {
                   await clearLastSearch();
                   setRefreshKey((v) => v + 1);
                 }
                 lastPressRef.current = now;
-                props?.onPress?.();
+                  props?.onPress?.(event);
               }}
-              onLongPress={props.onLongPress}
             >
               {props.children}
             </TouchableOpacity>
-          ),
+            );
+          },
         }}
       />
-      <Tab.Screen name="FavoritesTab" component={Favorites} options={{ title: 'Favoritos' }} />
       <Tab.Screen name="ServicesTab" component={Services} options={{ title: 'Serviços' }} />
-      <Tab.Screen name="MessagesTab" component={Messages} options={{ title: 'Mensagens' }} />
+      <Tab.Screen name="MessagesTab" component={Messages} options={{ title: 'Chat' }} />
       <Tab.Screen name="ProfileTab" component={Profile} options={{ title: 'Perfil' }} />
     </Tab.Navigator>
   );

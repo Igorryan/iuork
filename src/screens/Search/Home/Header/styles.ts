@@ -13,22 +13,15 @@ export const Container = styled(SafeAreaView)`
   padding-top: ${Platform.OS === 'android' ? 25 : 0}px;
 `;
 
-export const HeaderContainer = styled(TouchableOpacity)`
-  width: 100%;
-
-  padding: 0 28px;
-`;
-
 export const Header = styled(View)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   height: 62px;
-
   margin-top: 10px;
-
+  margin-horizontal: 28px;
+  padding: 0 4px;
   border-radius: 100px;
-
   background-color: ${({ theme }) => theme.COLORS.WHITE};
   box-shadow: 0px 4px 30px #0000001f;
 `;
@@ -37,8 +30,10 @@ export const SearchProfessionIcon = styled(Ionicons)`
   color: ${({ theme }) => theme.COLORS.WHITE};
 `;
 
-export const SearchTextContainer = styled(View)`
-  margin-left: 28px;
+export const SearchTextContainer = styled(TouchableOpacity)`
+  flex: 1;
+  margin-left: 24px;
+  padding: 8px 0;
 `;
 
 export const AddressText = styled(Text)`
@@ -55,8 +50,32 @@ export const DateText = styled(Text)`
   margin-top: 4px;
 `;
 
-export const IconView = styled(View)`
-  margin-right: 24px;
+export const ActionsContainer = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+`;
+
+export const CloseButton = styled(TouchableOpacity)`
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background-color: ${({ theme }) => theme.COLORS.GREY_10};
+  align-items: center;
+  justify-content: center;
+`;
+
+export const CloseIcon = styled(Feather)`
+  color: ${({ theme }) => theme.COLORS.GREY_80};
+`;
+
+export const IconView = styled(TouchableOpacity)`
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
 `;
 
 export const IconSettings = styled(Feather)`

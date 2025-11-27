@@ -6,7 +6,6 @@ import SignUp from '@screens/Auth/SignUp';
 import { TabRoutes } from './tab.routes';
 
 // Import das Telas na ordem solicitada
-import { Home } from '@screens/Home';
 import { MapScreen } from '@screens/Search/Home';
 import { SearchParams } from '@screens/Search/SearchParams';
 import { ProfessionalsVerticalList } from '@screens/Search/Home/ProfessionalsVerticalList';
@@ -19,7 +18,6 @@ import { BudgetDetail } from '@screens/BudgetDetail';
 // Tipos das rotas
 export type RootStackParamList = {
   Tabs: undefined;
-  Home: undefined; // kept for direct navigation if needed
   Map: undefined;
   Login: undefined;
   SignUp: undefined;
@@ -54,12 +52,6 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 // Configuração das rotas
 const screens = [
-  // Home and Map will live inside Tabs; keep them registered if deep linking is needed
-  {
-    name: 'Home',
-    component: Home,
-    options: { headerShown: false },
-  },
   {
     name: 'SearchParams',
     component: SearchParams,

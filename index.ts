@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
-import 'react-native-reanimated';
+// Temporariamente comentado para testar Fast Refresh
+// import 'react-native-reanimated';
 import { registerRootComponent } from 'expo';
 
 import App from './App';

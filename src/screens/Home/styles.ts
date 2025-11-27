@@ -1,223 +1,468 @@
 import styled from 'styled-components/native';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import theme from '@theme/index';
 
 export const Container = styled(SafeAreaView)`
   flex: 1;
-  background-color: ${({ theme }) => theme.COLORS.GREY_10};
-  padding: 24px 16px 16px 16px;
+  background-color: ${theme.COLORS.BACKGROUND};
+`;
+
+export const LoadingContainer = styled(View)`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const Header = styled(View)`
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  padding: 20px 24px 16px;
+  margin-bottom: 8px;
 `;
 
 export const GreetingContainer = styled(View)`
+  flex: 1;
 `;
 
 export const Title = styled(Text)`
-  font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
-  font-size: 24px;
-  color: #111;
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.XXL}px;
+  color: ${theme.COLORS.PRIMARY};
+  margin-bottom: 4px;
 `;
 
 export const Subtitle = styled(Text)`
-  font-family: ${({ theme }) => theme.FONT_FAMILY.REGULAR};
-  font-size: 14px;
-  color: #6b7280;
-  margin-top: 4px;
+  font-family: ${theme.FONT_FAMILY.REGULAR};
+  font-size: ${theme.FONT_SIZE.SM}px;
+  color: ${theme.COLORS.GREY_60};
 `;
 
-export const Avatar = styled.Image`
-  width: 45px;
-  height: 45px;
-  border-radius: 50px;
+export const Avatar = styled(Image)`
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background-color: ${theme.COLORS.GREY_10};
+  margin-right: 12px;
+`;
+
+export const AvatarPlaceholder = styled(View)`
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background-color: ${theme.COLORS.GREY_10};
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+`;
+
+export const UserInfoContainer = styled(View)`
+  flex: 1;
+  justify-content: center;
+`;
+
+export const UserName = styled(Text)`
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.XL}px;
+  color: ${theme.COLORS.PRIMARY};
+  margin-bottom: 4px;
+`;
+
+export const LocationContainer = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+`;
+
+export const LocationText = styled(Text)`
+  font-family: ${theme.FONT_FAMILY.REGULAR};
+  font-size: ${theme.FONT_SIZE.SM}px;
+  color: ${theme.COLORS.GREY_60};
+`;
+
+export const HeaderActions = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const HeaderButton = styled(TouchableOpacity)`
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: ${theme.COLORS.WHITE};
+  align-items: center;
+  justify-content: center;
+  shadow-color: ${theme.COLORS.SHADOW};
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+  elevation: 2;
 `;
 
 export const SearchRow = styled(View)`
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  padding: 0 24px 16px;
 `;
 
 export const SearchBox = styled(TouchableOpacity)`
   flex: 1;
-  height: 44px;
-  border-radius: 22px;
-  background-color: ${({ theme }) => theme.COLORS.WHITE};
-  padding: 0 14px;
+  height: 48px;
+  border-radius: 24px;
+  background-color: ${theme.COLORS.WHITE};
+  padding: 0 16px;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  shadow-color: ${theme.COLORS.SHADOW};
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.05;
+  shadow-radius: 8px;
+  elevation: 2;
 `;
 
 export const SearchPlaceholder = styled(Text)`
-  color: #9aa0a6;
-  font-size: 14px;
+  color: ${theme.COLORS.GREY_60};
+  font-size: ${theme.FONT_SIZE.MD}px;
+  font-family: ${theme.FONT_FAMILY.REGULAR};
 `;
 
 export const FilterButton = styled(TouchableOpacity)`
-  width: 44px;
-  height: 44px;
-  border-radius: 22px;
-  background-color: #111;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  background-color: ${theme.COLORS.SECONDARY};
   align-items: center;
   justify-content: center;
+  shadow-color: ${theme.COLORS.SECONDARY};
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.2;
+  shadow-radius: 4px;
+  elevation: 2;
 `;
 
 export const SectionTitle = styled(Text)`
-  font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
-  font-size: 18px;
-  color: #111;
-  margin: 8px 0 12px 0;
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.LG}px;
+  color: ${theme.COLORS.PRIMARY};
+  padding: 0 24px 12px;
+  margin-top: 8px;
+  margin-bottom: 0;
 `;
 
-export const Chips = styled(ScrollView)`
-  margin-bottom: 16px;
+export const CategoriesContainer = styled(ScrollView)`
+  padding: 0 24px 16px;
 `;
 
-export const Chip = styled(TouchableOpacity)`
-  padding: 8px 14px;
-  border-radius: 999px;
-  background-color: ${({ theme }) => theme.COLORS.WHITE};
-  margin-right: 10px;
-`;
-
-export const ChipActive = styled(TouchableOpacity)`
-  padding: 8px 14px;
-  border-radius: 999px;
-  background-color: #111;
-  margin-right: 10px;
-`;
-
-export const ChipText = styled(Text)`
-  color: #111;
-  font-size: 12px;
-`;
-
-export const ChipTextActive = styled(Text)`
-  color: #fff;
-  font-size: 12px;
-`;
-
-export const Card = styled(View)`
-  flex: 1;
-  position: relative;
+export const CategoryChip = styled(TouchableOpacity)<{ isSelected: boolean; categoryColor: string }>`
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 16px;
   border-radius: 24px;
-  overflow: hidden;
-  margin-bottom: 16px;
+  background-color: ${props => props.isSelected ? props.categoryColor : theme.COLORS.WHITE};
+  margin-right: 12px;
+  border-width: ${props => props.isSelected ? 0 : 1.5}px;
+  border-color: ${props => props.isSelected ? 'transparent' : props.categoryColor};
+  shadow-color: ${theme.COLORS.SHADOW};
+  shadow-offset: 0px 2px;
+  shadow-opacity: ${props => props.isSelected ? 0.15 : 0.05};
+  shadow-radius: 8px;
+  elevation: ${props => props.isSelected ? 3 : 1};
 `;
 
-export const CardImage = styled(Image)`
-  width: 100%;
-  height: 280px;
-`;
-
-export const FavoriteButton = styled(TouchableOpacity)`
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 18px;
-  border-width: 1px;
-  border-color: #ffffff55;
+export const CategoryIconContainer = styled(View)<{ categoryColor: string; isSelected: boolean }>`
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: ${props => props.isSelected ? 'rgba(255, 255, 255, 0.3)' : `${props.categoryColor}15`};
   align-items: center;
   justify-content: center;
-  background-color: #00000022;
+  margin-right: 8px;
 `;
 
-export const CardGradient = styled(View)`
+export const CategoryText = styled(Text)<{ isSelected: boolean }>`
+  color: ${props => props.isSelected ? theme.COLORS.WHITE : theme.COLORS.PRIMARY};
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.SM}px;
+`;
+
+export const FeaturedContainer = styled(ScrollView)`
+  padding: 0 24px 16px;
+`;
+
+export const FeaturedCard = styled(TouchableOpacity)`
+  width: 280px;
+  height: 200px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-right: 16px;
+  position: relative;
+`;
+
+export const FeaturedImage = styled(Image)`
+  width: 100%;
+  height: 100%;
+  background-color: ${theme.COLORS.GREY_10};
+`;
+
+export const FeaturedImagePlaceholder = styled(View)`
+  width: 100%;
+  height: 100%;
+  background-color: ${theme.COLORS.GREY_10};
+  align-items: center;
+  justify-content: center;
+`;
+
+export const FeaturedGradient = styled(View)`
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 110px;
-  background-color: rgba(0,0,0,0.35);
+  height: 100px;
+  background-color: rgba(0,0,0,0.5);
 `;
 
-export const CardContent = styled(View)`
+export const FeaturedContent = styled(View)`
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: 12px;
+  bottom: 16px;
 `;
 
-export const Country = styled(Text)`
-  color: #ffffffcc;
-  font-size: 12px;
-  margin-bottom: 2px;
+export const FeaturedName = styled(Text)`
+  color: ${theme.COLORS.WHITE};
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.LG}px;
+  margin-bottom: 4px;
 `;
 
-export const Place = styled(Text)`
-  color: #fff;
-  font-family: ${({ theme }) => theme.FONT_FAMILY.BOLD};
-  font-size: 20px;
+export const FeaturedProfession = styled(Text)`
+  color: ${theme.COLORS.WHITE}CC;
+  font-family: ${theme.FONT_FAMILY.REGULAR};
+  font-size: ${theme.FONT_SIZE.SM}px;
+  margin-bottom: 8px;
 `;
 
-export const RatingRow = styled(View)`
+export const FeaturedRating = styled(View)`
   flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 `;
 
-export const RatingText = styled(Text)`
-  color: #fff;
-  font-size: 12px;
+export const FeaturedRatingText = styled(Text)`
+  color: ${theme.COLORS.WHITE};
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.SM}px;
 `;
 
-export const ReviewsText = styled(Text)`
-  color: #e5e7eb;
-  font-size: 12px;
-  margin-left: 6px;
+export const CategorySection = styled(View)`
+  margin-bottom: 24px;
 `;
 
-export const SeeMoreButton = styled(TouchableOpacity)`
-  margin-top: 10px;
-  height: 44px;
-  background-color: #111111cc;
-  border-radius: 999px;
+export const CategorySectionHeader = styled(View)`
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 10px 0 16px;
+  padding: 0 24px 12px;
+  margin-top: 8px;
 `;
 
-export const SeeMoreText = styled(Text)`
-  color: #fff;
-  font-size: 14px;
-`;
-
-export const SeeMoreIcon = styled(View)`
-  width: 36px;
-  height: 36px;
-  border-radius: 18px;
-  background-color: #fff;
+export const CategorySectionIconContainer = styled(View)<{ categoryColor: string }>`
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: ${props => `${props.categoryColor}15`};
   align-items: center;
   justify-content: center;
+  margin-right: 10px;
 `;
 
-export const BottomBar = styled(View)`
-  height: 68px;
-  background-color: #111;
+export const CategorySectionTitle = styled(Text)`
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.LG}px;
+  color: ${theme.COLORS.PRIMARY};
+`;
+
+export const ServicesHorizontalList = styled(ScrollView)`
+  padding: 0 24px;
+`;
+
+export const ServiceCardHorizontal = styled(TouchableOpacity)<{ categoryColor: string }>`
+  width: 140px;
+  background-color: ${theme.COLORS.WHITE};
+  border-radius: 12px;
+  padding: 12px;
+  margin-right: 12px;
+  align-items: center;
+  shadow-color: ${theme.COLORS.SHADOW};
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.05;
+  shadow-radius: 8px;
+  elevation: 2;
+  border-width: 1px;
+  border-color: ${props => `${props.categoryColor}20`};
+`;
+
+export const ServiceIconContainerHorizontal = styled(View)<{ categoryColor: string }>`
+  width: 48px;
+  height: 48px;
   border-radius: 24px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;
-  padding: 0 10px;
-`;
-
-export const BottomButton = styled(TouchableOpacity)`
-  width: 44px;
-  height: 44px;
-  border-radius: 22px;
-  background-color: #fff;
+  background-color: ${props => `${props.categoryColor}15`};
   align-items: center;
   justify-content: center;
+  margin-bottom: 8px;
 `;
 
+export const ServiceNameHorizontal = styled(Text)`
+  color: ${theme.COLORS.PRIMARY};
+  font-family: ${theme.FONT_FAMILY.MEDIUM};
+  font-size: ${theme.FONT_SIZE.SM}px;
+  text-align: center;
+`;
 
+export const EmptyContainer = styled(View)`
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+`;
+
+export const EmptyText = styled(Text)`
+  color: ${theme.COLORS.PRIMARY};
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.LG}px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+`;
+
+export const EmptySubtext = styled(Text)`
+  color: ${theme.COLORS.GREY_60};
+  font-family: ${theme.FONT_FAMILY.REGULAR};
+  font-size: ${theme.FONT_SIZE.MD}px;
+  text-align: center;
+`;
+
+export const BannerContainer = styled(View)`
+  margin: 0 24px 16px 24px;
+  height: 200px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  background-color: ${theme.COLORS.GREY_10};
+  elevation: 3;
+  shadow-color: ${theme.COLORS.SHADOW};
+  shadow-offset: 0px 4px;
+  shadow-opacity: 0.15;
+  shadow-radius: 8px;
+`;
+
+export const BannerImage = styled(Image)`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+`;
+
+export const BannerOverlay = styled(View)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 1;
+`;
+
+export const BannerContent = styled(View)`
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+  align-items: center;
+  padding: 20px;
+  z-index: 2;
+  position: relative;
+`;
+
+export const BannerTextContainer = styled(View)`
+  flex: 1;
+  justify-content: center;
+  z-index: 2;
+`;
+
+export const BannerTitle = styled(Text)`
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.XXL}px;
+  color: ${theme.COLORS.WHITE};
+  margin-bottom: 4px;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+`;
+
+export const BannerSubtitle = styled(Text)`
+  font-family: ${theme.FONT_FAMILY.REGULAR};
+  font-size: ${theme.FONT_SIZE.MD}px;
+  color: ${theme.COLORS.WHITE};
+  margin-bottom: 16px;
+  opacity: 0.95;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);
+`;
+
+export const BannerButton = styled(TouchableOpacity)`
+  background-color: ${theme.COLORS.SECONDARY};
+  padding: 12px 24px;
+  border-radius: 12px;
+  align-self: flex-start;
+`;
+
+export const BannerButtonText = styled(Text)`
+  font-family: ${theme.FONT_FAMILY.BOLD};
+  font-size: ${theme.FONT_SIZE.MD}px;
+  color: ${theme.COLORS.WHITE};
+`;
+
+export const CategoriesSection = styled(View)`
+  margin-bottom: 24px;
+  margin-top: 8px;
+`;
+
+export const CategoriesHorizontalList = styled(ScrollView)`
+  margin-top: 12px;
+  padding-left: 0;
+`;
+
+export const CategoryCard = styled(TouchableOpacity)<{ categoryColor: string }>`
+  width: 100px;
+  height: 120px;
+  background-color: ${theme.COLORS.WHITE};
+  border-radius: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  padding: 12px;
+  shadow-color: ${theme.COLORS.SHADOW};
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 8px;
+  elevation: 3;
+  border-width: 1px;
+  border-color: ${props => `${props.categoryColor}20`};
+`;
+
+export const CategoryCardIconContainer = styled(View)<{ categoryColor: string }>`
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background-color: ${props => `${props.categoryColor}15`};
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+`;
+
+export const CategoryCardName = styled(Text)`
+  font-family: ${theme.FONT_FAMILY.MEDIUM};
+  font-size: ${theme.FONT_SIZE.SM}px;
+  color: ${theme.COLORS.PRIMARY};
+  text-align: center;
+`;

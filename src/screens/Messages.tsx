@@ -225,7 +225,7 @@ const Messages: React.FC = () => {
     } else if (diffInDays < 7) {
       return `${diffInDays}d`;
     } else {
-      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
     }
   };
 
@@ -358,7 +358,7 @@ const Messages: React.FC = () => {
                             </StatusTag>
                           ))}
                         </StatusTagsContainer>
-                      )}
+                        )}
                     </NameRow>
                     
                     <MessageRow>

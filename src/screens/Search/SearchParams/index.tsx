@@ -17,7 +17,7 @@ import { What } from './What';
 import { IAddress } from 'src/types/address';
 import { setUserAddress, getUserAddress } from '@functions/getUserAddress';
 import { findPlaceFromLatLng } from '@functions/PlacesWithGoogleMaps';
-import { setLastSearch } from '@functions/searchStorage';
+import { setLastSearch, getLastSearch } from '@functions/searchStorage';
 
 // types
 
@@ -33,6 +33,27 @@ export const SearchParams: React.FC = () => {
   const [address, setAddress] = useState<IAddress>();
   const [suggestedAddress, setSuggestedAddress] = useState<IAddress>();
   const [keyword, setKeyword] = useState('');
+
+  // Carregar última busca salva
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const lastSearch = await getLastSearch();
+        if (isMounted && lastSearch?.keyword) {
+          setKeyword(lastSearch.keyword);
+          if (lastSearch.address) {
+            setAddress(lastSearch.address);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar última busca:', error);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // effects
   useEffect(() => {

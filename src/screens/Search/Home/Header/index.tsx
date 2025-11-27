@@ -8,16 +8,22 @@ import { useEffect, useState } from 'react';
 
 // application
 import { getUserAddress } from '@functions/getUserAddress';
+import { getLastSearch, clearLastSearch } from '@functions/searchStorage';
 
 // consts
 
 // types
 import { RootStackParamList } from '@routes/stack.routes';
 
-export const Header: React.FC = () => {
+type HeaderProps = {
+  onSearchCleared?: () => void;
+};
+
+export const Header: React.FC<HeaderProps> = ({ onSearchCleared }) => {
   // hooks
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [addressText, setAddressText] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>('');
 
   // refs
 
@@ -38,11 +44,27 @@ export const Header: React.FC = () => {
     }
   }
 
+  async function handleClearSearch() {
+    try {
+      await clearLastSearch();
+      setKeyword('');
+      // Chama callback para atualizar o estado no MapScreen
+      if (onSearchCleared) {
+        onSearchCleared();
+      }
+    } catch (error) {
+      console.error('Erro ao limpar busca:', error);
+    }
+  }
+
   // effects
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      const saved = await getUserAddress();
+      const [saved, lastSearch] = await Promise.all([
+        getUserAddress(),
+        getLastSearch(),
+      ]);
       if (!isMounted) return;
       if (saved?.street) {
         const text = `${saved.street}${saved.number ? `, ${saved.number}` : ''}`;
@@ -50,12 +72,21 @@ export const Header: React.FC = () => {
       } else {
         setAddressText('Definir endereço');
       }
+      if (lastSearch?.keyword) {
+        setKeyword(lastSearch.keyword);
+      }
     })();
     const unsubscribe = navigation.addListener('focus', async () => {
-      const saved = await getUserAddress();
+      const [saved, lastSearch] = await Promise.all([
+        getUserAddress(),
+        getLastSearch(),
+      ]);
       if (saved?.street) {
         const text = `${saved.street}${saved.number ? `, ${saved.number}` : ''}`;
         setAddressText(text);
+      }
+      if (lastSearch?.keyword) {
+        setKeyword(lastSearch.keyword);
       }
     });
     return () => {
@@ -68,17 +99,22 @@ export const Header: React.FC = () => {
 
   return (
     <S.Container>
-      <S.HeaderContainer activeOpacity={0.9} onPress={handleEditParamsNavigate}>
-        <S.Header>
-          <S.SearchTextContainer>
-            <S.AddressText>{addressText || 'Definir endereço'}</S.AddressText>
-            <S.DateText>Manicure</S.DateText>
-          </S.SearchTextContainer>
-          <S.IconView>
+      <S.Header>
+        <S.SearchTextContainer activeOpacity={0.9} onPress={handleEditParamsNavigate}>
+          <S.AddressText>{addressText || 'Definir endereço'}</S.AddressText>
+          <S.DateText>{keyword || 'O que você precisa?'}</S.DateText>
+        </S.SearchTextContainer>
+        <S.ActionsContainer>
+          {keyword ? (
+            <S.CloseButton onPress={handleClearSearch} activeOpacity={0.7}>
+              <S.CloseIcon name="x" size={18} />
+            </S.CloseButton>
+          ) : null}
+          <S.IconView activeOpacity={0.9} onPress={handleEditParamsNavigate}>
             <S.IconSettings name="sliders" size={20} />
           </S.IconView>
-        </S.Header>
-      </S.HeaderContainer>
+        </S.ActionsContainer>
+      </S.Header>
     </S.Container>
   );
 };
