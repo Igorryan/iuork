@@ -71,72 +71,81 @@ export const Service: React.FC<IProps> = ({ service, professionalData, acceptedB
       activeOpacity={0.9}
       onPress={handleServicePress}
     >
-        <S.CardContent>
-          <S.LeftSection>
-            <S.ServiceTitle numberOfLines={2}>{service.name}</S.ServiceTitle>
-            {!!service.description && (
-              <S.ServiceDescription numberOfLines={2}>
-                {service.description}
-              </S.ServiceDescription>
-            )}
-            <S.BottomRow>
-              {hasPendingBudget ? (
-                <S.PendingBudgetButton onPress={handleBudgetPress}>
-                  <S.PendingBudgetText>Aguardando orçamento</S.PendingBudgetText>
-                </S.PendingBudgetButton>
-              ) : hasReceivedBudget && acceptedBudgetPrice ? (
-                <>
-                  <S.PriceButton onPress={handleBudgetPress}>
-                    <S.PriceText>
-                      R$ {acceptedBudgetPrice.toFixed(2).replace('.', ',')}
-                      {service.pricingType === 'HOURLY' ? '/h' : ''}
-                    </S.PriceText>
-                  </S.PriceButton>
-                  <S.ReceivedBudgetButton onPress={handleBudgetPress}>
-                    <S.ReceivedBudgetText>Orçamento recebido</S.ReceivedBudgetText>
-                  </S.ReceivedBudgetButton>
-                </>
-              ) : displayPrice ? (
+      <S.CardContent>
+        <S.LeftSection>
+          <S.ServiceTitle numberOfLines={2}>{service.name}</S.ServiceTitle>
+          {!!service.description && (
+            <S.ServiceDescription numberOfLines={2}>
+              {service.description}
+            </S.ServiceDescription>
+          )}
+          <S.BottomRow>
+            {hasPendingBudget ? (
+              <S.PendingBudgetButton onPress={handleBudgetPress}>
+                <S.PendingBudgetText>Aguardando orçamento</S.PendingBudgetText>
+              </S.PendingBudgetButton>
+            ) : hasReceivedBudget && acceptedBudgetPrice ? (
+              <>
                 <S.PriceButton onPress={handleBudgetPress}>
                   <S.PriceText>
-                    R$ {displayPrice.toFixed(2).replace('.', ',')}
+                    R$ {acceptedBudgetPrice.toFixed(2).replace('.', ',')}
                     {service.pricingType === 'HOURLY' ? '/h' : ''}
                   </S.PriceText>
                 </S.PriceButton>
-              ) : (
-                <S.RequestBudgetButton onPress={handleBudgetPress}>
-                  <S.RequestBudgetText>Solicitar orçamento</S.RequestBudgetText>
-                </S.RequestBudgetButton>
-              )}
-            </S.BottomRow>
-          </S.LeftSection>
+                <S.ReceivedBudgetButton onPress={handleBudgetPress}>
+                  <S.ReceivedBudgetText>Orçamento recebido</S.ReceivedBudgetText>
+                </S.ReceivedBudgetButton>
+              </>
+            ) : displayPrice ? (
+              <S.PriceButton onPress={handleBudgetPress}>
+                <S.PriceText>
+                  R$ {displayPrice.toFixed(2).replace('.', ',')}
+                  {service.pricingType === 'HOURLY' ? '/h' : ''}
+                </S.PriceText>
+              </S.PriceButton>
+            ) : (
+              <S.RequestBudgetButton onPress={handleBudgetPress}>
+                <S.RequestBudgetText>Solicitar orçamento</S.RequestBudgetText>
+              </S.RequestBudgetButton>
+            )}
+          </S.BottomRow>
+        </S.LeftSection>
 
-          <S.RightSection>
-            <S.RatingContainer>
-              <MaterialCommunityIcons name="star" size={16} color={COLORS.BLACK} />
-              <S.RatingText>4.92 (25)</S.RatingText>
-            </S.RatingContainer>
-            <S.ImageContainer>
-              {service.images?.[0] ? (
-                <S.ThumbWrapper>
-                  <S.Thumbnail
-                    source={{
-                      uri: service.images[0],
-                    }}
-                  />
-                  {service.images.length > 1 && (
-                    <S.ThumbOverlay>
-                      <S.ThumbOverlayIcon name="image" size={10} />
-                      <S.ThumbOverlayText>{service.images.length}</S.ThumbOverlayText>
-                    </S.ThumbOverlay>
-                  )}
-                </S.ThumbWrapper>
-              ) : (
-                <S.PlaceholderThumb />
+        <S.RightSection>
+          {(service.isOnline || service.isPresential) && (
+            <S.TagsContainer>
+              {service.isPresential && (
+                <S.Tag>
+                  <S.TagText>Presencial</S.TagText>
+                </S.Tag>
               )}
+              {service.isOnline && (
+                <S.Tag>
+                  <S.TagText>Remoto</S.TagText>
+                </S.Tag>
+              )}
+            </S.TagsContainer>
+          )}
+          {service.images?.[0] && (
+            <S.ImageContainer>
+              <S.ThumbWrapper>
+                <S.Thumbnail
+                  source={{
+                    uri: service.images[0],
+                  }}
+                />
+                {service.images.length > 1 && (
+                  <S.ThumbOverlay>
+                    <S.ThumbOverlayIcon name="image" size={10} />
+                    <S.ThumbOverlayText>{service.images.length}</S.ThumbOverlayText>
+                  </S.ThumbOverlay>
+                )}
+              </S.ThumbWrapper>
             </S.ImageContainer>
-          </S.RightSection>
-        </S.CardContent>
-      </S.Container>
+          )}
+
+        </S.RightSection>
+      </S.CardContent>
+    </S.Container>
   );
 };

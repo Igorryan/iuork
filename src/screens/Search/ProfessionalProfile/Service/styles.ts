@@ -41,8 +41,6 @@ export const LeftSection = styled(View)`
 
 export const RightSection = styled(View)`
   align-items: flex-end;
-  margin-left: 16px;
-  justify-content: space-between;
   min-height: 100px;
 `;
 
@@ -311,4 +309,26 @@ export const CarouselImage = styled(Image)`
   height: 100%;
 
   border-radius: 14px;
+`;
+
+export const TagsContainer = styled(View)`
+  flex-direction: row;
+  gap: 6px;
+  margin-bottom: 6px;
+`;
+
+export const Tag = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  margin-top:2px;
+  background-color: ${({ theme }) => theme.COLORS.PRIMARY}10;
+  padding: 2px 6px;
+  border-radius: 4px;
+`;
+
+export const TagText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSSM}px;
+  color: ${({ theme }) => theme.COLORS.PRIMARY}80;
 `;

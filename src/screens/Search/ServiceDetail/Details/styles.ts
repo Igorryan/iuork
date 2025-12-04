@@ -7,8 +7,8 @@ import { Feather } from '@expo/vector-icons';
 // types
 
 // styles
-export const Container = styled(View)`
-  padding: 32px 20px;
+export const Container = styled(View)<{ hasCarousel?: boolean }>`
+  padding: ${({ hasCarousel }) => hasCarousel ? '32px 20px' : '20px 20px'};
 `;
 
 export const ServiceTitle = styled(Text)`

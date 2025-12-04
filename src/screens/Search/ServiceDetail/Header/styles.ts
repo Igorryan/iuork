@@ -21,8 +21,6 @@ export const Container = styled(TouchableOpacity)`
   padding: 6px 20px;
 
   background-color: ${({ theme }) => theme.COLORS.WHITE};
-
-  padding-top: ${Platform.OS === 'android' ? 40 : 0}px;
 `;
 
 export const OverlayContainer = styled(TouchableOpacity)`
@@ -39,8 +37,6 @@ export const OverlayContainer = styled(TouchableOpacity)`
   padding: 6px 20px;
 
   background-color: rgba(255, 255, 255, 0.95);
-
-  padding-top: ${Platform.OS === 'android' ? 40 : 0}px;
 `;
 
 export const BackIcon = styled(Feather)``;

@@ -34,6 +34,8 @@ export interface Service {
   description: string;
   pricingType?: 'FIXED' | 'HOURLY' | 'BUDGET';
   price: number | null;
+  isOnline?: boolean;
+  isPresential?: boolean;
   images: string[];
 }
 
@@ -45,12 +47,15 @@ export interface Professional {
   name: string;
   profession: string;
   description: string;
-  address: Address;
+  address: Address | null;
+  radiusKm?: number;
   completedServicesCount: number;
   ratingsAggregate: {
     avg: number;
     count: number;
   };
+  hasOnlineServices?: boolean;
+  hasPresentialServices?: boolean;
 }
 
 

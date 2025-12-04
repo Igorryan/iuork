@@ -63,7 +63,7 @@ export const UserInfoContainer = styled(View)`
 
 export const UserName = styled(Text)`
   font-family: ${theme.FONT_FAMILY.BOLD};
-  font-size: ${theme.FONT_SIZE.XL}px;
+  font-size: ${theme.FONT_SIZE.LG}px;
   color: ${theme.COLORS.PRIMARY};
   margin-bottom: 4px;
 `;
@@ -78,6 +78,7 @@ export const LocationText = styled(Text)`
   font-family: ${theme.FONT_FAMILY.REGULAR};
   font-size: ${theme.FONT_SIZE.SM}px;
   color: ${theme.COLORS.GREY_60};
+  flex: 1;
 `;
 
 export const HeaderActions = styled(View)`
@@ -289,12 +290,14 @@ export const ServicesHorizontalList = styled(ScrollView)`
 `;
 
 export const ServiceCardHorizontal = styled(TouchableOpacity)<{ categoryColor: string }>`
-  width: 140px;
+  width: 160px;
   background-color: ${theme.COLORS.WHITE};
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 16px;
+  padding: 0;
+  padding-bottom: 12px;
   margin-right: 12px;
   align-items: center;
+  overflow: hidden;
   shadow-color: ${theme.COLORS.SHADOW};
   shadow-offset: 0px 2px;
   shadow-opacity: 0.05;
@@ -305,13 +308,13 @@ export const ServiceCardHorizontal = styled(TouchableOpacity)<{ categoryColor: s
 `;
 
 export const ServiceIconContainerHorizontal = styled(View)<{ categoryColor: string }>`
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
+  width: 100%;
+  height: 120px;
   background-color: ${props => `${props.categoryColor}15`};
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
+  overflow: hidden;
 `;
 
 export const ServiceNameHorizontal = styled(Text)`
@@ -319,6 +322,12 @@ export const ServiceNameHorizontal = styled(Text)`
   font-family: ${theme.FONT_FAMILY.MEDIUM};
   font-size: ${theme.FONT_SIZE.SM}px;
   text-align: center;
+  padding-horizontal: 8px;
+`;
+
+export const ServiceImageHorizontal = styled(Image)`
+  width: 100%;
+  height: 100%;
 `;
 
 export const EmptyContainer = styled(View)`
@@ -343,12 +352,10 @@ export const EmptySubtext = styled(Text)`
 `;
 
 export const BannerContainer = styled(View)`
-  margin: 0 24px 16px 24px;
-  height: 200px;
-  border-radius: 20px;
+  margin: 0 24px 12px;
+  height: 230px;
   overflow: hidden;
   position: relative;
-  background-color: ${theme.COLORS.GREY_10};
   elevation: 3;
   shadow-color: ${theme.COLORS.SHADOW};
   shadow-offset: 0px 4px;
@@ -364,6 +371,7 @@ export const BannerImage = styled(Image)`
   left: 0;
   right: 0;
   bottom: 0;
+  resize-mode: contain;
 `;
 
 export const BannerOverlay = styled(View)`
@@ -433,36 +441,30 @@ export const CategoriesHorizontalList = styled(ScrollView)`
 `;
 
 export const CategoryCard = styled(TouchableOpacity)<{ categoryColor: string }>`
-  width: 100px;
-  height: 120px;
-  background-color: ${theme.COLORS.WHITE};
-  border-radius: 16px;
+  background-color: transparent;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   margin-right: 12px;
-  padding: 12px;
-  shadow-color: ${theme.COLORS.SHADOW};
-  shadow-offset: 0px 2px;
-  shadow-opacity: 0.1;
-  shadow-radius: 8px;
-  elevation: 3;
-  border-width: 1px;
-  border-color: ${props => `${props.categoryColor}20`};
 `;
 
-export const CategoryCardIconContainer = styled(View)<{ categoryColor: string }>`
-  width: 56px;
-  height: 56px;
-  border-radius: 28px;
-  background-color: ${props => `${props.categoryColor}15`};
+export const CategoryCardIconContainer = styled(View)<{ categoryColor: string; isSelected?: boolean }>`
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
+  overflow: hidden;
+  background-color: ${props => props.categoryColor || 'transparent'};
+  border-width: ${props => props.isSelected ? '3px' : '0px'};
+  border-color: ${props => props.isSelected ? props.categoryColor : 'transparent'};
 `;
 
 export const CategoryCardName = styled(Text)`
-  font-family: ${theme.FONT_FAMILY.MEDIUM};
-  font-size: ${theme.FONT_SIZE.SM}px;
+  font-family: ${theme.FONT_FAMILY.REGULAR};
+  font-size: ${theme.FONT_SIZE.SSM}px;
   color: ${theme.COLORS.PRIMARY};
   text-align: center;
+  padding: 0;
+  width: 100%;
 `;

@@ -13,9 +13,10 @@ import { useTheme } from 'styled-components/native';
 type DetailsProps = {
   name: string;
   description: string;
+  hasCarousel?: boolean;
 };
 
-export const Details: React.FC<DetailsProps> = ({ name, description }) => {
+export const Details: React.FC<DetailsProps> = ({ name, description, hasCarousel }) => {
   // hooks
   const { COLORS } = useTheme();
 
@@ -31,7 +32,7 @@ export const Details: React.FC<DetailsProps> = ({ name, description }) => {
 
   // renders
   return (
-    <S.Container>
+    <S.Container hasCarousel={hasCarousel}>
       <S.ServiceTitle>{name}</S.ServiceTitle>
       <S.ServiceDescription>{description}</S.ServiceDescription>
 

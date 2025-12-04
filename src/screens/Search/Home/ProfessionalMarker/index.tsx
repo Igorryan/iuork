@@ -96,6 +96,7 @@ export const ProfessionalMarker: React.FC<Props> = ({
         latitude: data.address.latitude,
         longitude: data.address.longitude,
       }}
+      zIndex={focused ? 1000 : 1}
     >
       <S.CustomProfessionalMarker>
         <S.MarkerImage

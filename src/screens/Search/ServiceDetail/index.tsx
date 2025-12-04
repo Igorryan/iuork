@@ -7,8 +7,8 @@ import * as S from './styles';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@routes/stack.routes';
-import { Alert, StatusBar, Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, StatusBar, Platform, View } from 'react-native';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 
 // application
 import { RatingView } from '@components/RatingView';
@@ -212,7 +212,7 @@ export const ServiceDetail: React.FC = () => {
 
   // renders
   return (
-    <S.Container>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }} edges={(!service?.images || service.images.length === 0) ? ['bottom'] : ['top', 'bottom']}>
       <StatusBar barStyle="dark-content" translucent={false} />
       {service && (
         <>
@@ -227,7 +227,7 @@ export const ServiceDetail: React.FC = () => {
           )}
           
           {(!service.images || service.images.length === 0) && (
-            <S.HeaderWithSafeArea style={{ paddingTop: Math.max(insets.top, Platform.OS === 'android' ? 40 : 0) }}>
+            <S.HeaderWithSafeArea style={{ paddingTop: insets.top }}>
               <Header
                 name={route.params.professionalData.name}
                 image={route.params.professionalData.image}
@@ -236,15 +236,19 @@ export const ServiceDetail: React.FC = () => {
             </S.HeaderWithSafeArea>
           )}
 
-          <S.Content>
+          <S.Content hasCarousel={!!(service.images && service.images.length > 0)}>
             {service.images && service.images.length > 0 && (
               <S.CarouselWrapper >
                 <PhotosCarousel serviceImages={service.images} />
               </S.CarouselWrapper>
             )}
 
-            <S.Header>
-              <Details name={service.name} description={service.description} />
+            <S.Header hasCarousel={!!(service.images && service.images.length > 0)}>
+              <Details 
+                name={service.name} 
+                description={service.description}
+                hasCarousel={!!(service.images && service.images.length > 0)}
+              />
             </S.Header>
 
             <S.Divider />
@@ -280,6 +284,6 @@ export const ServiceDetail: React.FC = () => {
         budgetStatus={currentBudget?.status}
         currentBudget={currentBudget}
       />
-    </S.Container>
+    </SafeAreaView>
   );
 };

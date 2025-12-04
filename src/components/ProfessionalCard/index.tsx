@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { formatDistance } from '@functions/formatDistance';
 import { Professional as IProfessional } from '../../types/domain';
+import theme from '@theme/index';
 
 type Props = TouchableOpacityProps & {
   professional: IProfessional;
@@ -24,7 +25,26 @@ export const ProfessionalCard: React.FC<Props> = ({ professional, ...props }) =>
           <S.SaveIcon name="heart" size={16} />
         </S.NameAndSaveIconContainer>
 
-        <S.Type>{professional.profession}</S.Type>
+        <S.ProfessionRow>
+          <S.Type>{professional.profession}</S.Type>
+          {(professional.hasOnlineServices || professional.hasPresentialServices) && (
+            <>
+              {professional.hasPresentialServices && (
+                <S.ModeTag>
+                  <S.ModeDot />
+                  <S.ModeText>Presencial</S.ModeText>
+                </S.ModeTag>
+              )}
+              {professional.hasOnlineServices && (
+                <S.ModeTag>
+                  <S.ModeDot />
+                  <S.ModeText>Remoto</S.ModeText>
+                </S.ModeTag>
+              )}
+
+            </>
+          )}
+        </S.ProfessionRow>
 
         <S.WobsDescription>
           <S.WobsWord>{professional.completedServicesCount} jobs</S.WobsWord> concluídos

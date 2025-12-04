@@ -13,6 +13,7 @@ export interface ProfessionCategory {
 export interface Profession {
   id: string;
   name: string;
+  imageUrl: string | null;
   categoryId: string | null;
   category?: ProfessionCategory | null;
 }

@@ -33,6 +33,8 @@ export const Map: React.FC<Props> = ({ data, professionalFocused, setProfessiona
 
   // refs
   const mapRef = useRef<MapView>(null);
+  const lastDataKeyRef = useRef<string | null>(null);
+  const isAdjustingZoomRef = useRef(false);
 
   // states
   const [userAddress, setUserAddress] = useState<Address>();
@@ -53,34 +55,97 @@ export const Map: React.FC<Props> = ({ data, professionalFocused, setProfessiona
       const savedAddress = await getUserAddress();
       if (!isMounted) return;
       setUserAddress(savedAddress);
-      if (savedAddress) {
-        focusMarker({
-          latitude: savedAddress.latitude,
-          longitude: savedAddress.longitude,
-        });
-      }
     })();
     return () => {
       isMounted = false;
     };
-  }, [focusMarker]);
+  }, []);
+
+  // Calcular coordenadas para ajustar o zoom
+  const coordinatesToFit = useMemo(() => {
+    const coords: Array<{ latitude: number; longitude: number }> = [];
+    
+    // Adicionar localização do usuário se disponível
+    if (userAddress?.latitude && userAddress?.longitude) {
+      coords.push({
+        latitude: userAddress.latitude,
+        longitude: userAddress.longitude,
+      });
+    }
+    
+    // Adicionar localizações dos profissionais
+    data.forEach((professional) => {
+      if (professional?.address?.latitude && professional?.address?.longitude) {
+        coords.push({
+          latitude: professional.address.latitude,
+          longitude: professional.address.longitude,
+        });
+      }
+    });
+    
+    return coords;
+  }, [data, userAddress]);
+
+  // Ajustar zoom para mostrar todos os profissionais (quando os dados mudarem - nova busca)
+  useEffect(() => {
+    // Só ajustar se houver coordenadas para mostrar (usuário ou profissionais)
+    if (!mapRef.current || coordinatesToFit.length === 0) return;
+    
+    // Criar uma chave única baseada nos IDs dos profissionais e localização do usuário
+    const dataKey = [
+      data.map(p => p.id).sort().join(','),
+      userAddress?.latitude ? String(userAddress.latitude) : '',
+      userAddress?.longitude ? String(userAddress.longitude) : '',
+    ].join('|');
+    
+    // Ajustar se for a primeira vez (lastDataKeyRef.current é null) ou se os dados mudaram (nova busca ou localização carregada)
+    if (lastDataKeyRef.current === null || lastDataKeyRef.current !== dataKey) {
+      lastDataKeyRef.current = dataKey;
+      isAdjustingZoomRef.current = true;
+      
+      // Aguardar um pouco mais para garantir que o mapa está totalmente renderizado
+      const timer = setTimeout(() => {
+        if (mapRef.current && coordinatesToFit.length > 0) {
+          mapRef.current.fitToCoordinates(coordinatesToFit, {
+            edgePadding: {
+              top: 100,
+              right: 50,
+              bottom: 200, // Espaço extra para a lista horizontal
+              left: 50,
+            },
+            animated: true,
+          });
+          // Resetar flag após um tempo para permitir que focusMarker funcione novamente
+          setTimeout(() => {
+            isAdjustingZoomRef.current = false;
+          }, 1000);
+        }
+      }, 800);
+
+      return () => clearTimeout(timer);
+    }
+  }, [coordinatesToFit, data, userAddress]);
+
+  // Ordenar marcadores para que o focado seja renderizado por último (sobreposto)
+  const orderedMarkers = useMemo(() => {
+    // Separar profissionais focados e não focados
+    const nonFocusedProfessionals = data.filter(
+      (p) => p && professionalFocused?.id !== p.id
+    );
+    const focusedProfessional = data.find(
+      (p) => p && professionalFocused?.id === p.id
+    );
+
+    return { nonFocusedProfessionals, focusedProfessional };
+  }, [data, professionalFocused]);
 
   // effects
   useEffect(() => {
-    if (professionalFocused) focusMarker(professionalFocused.location);
+    // Só focar no marcador se não estivermos ajustando o zoom automaticamente
+    if (professionalFocused && !isAdjustingZoomRef.current) {
+      focusMarker(professionalFocused.location);
+    }
   }, [focusMarker, professionalFocused]);
-
-  useEffect(() => {
-    if (!data || data.length === 0) return;
-    const first = data[0];
-    if (!first?.address) return;
-    setTimeout(() => {
-      focusMarker({
-        latitude: first.address.latitude,
-        longitude: first.address.longitude,
-      });
-    }, 1000);
-  }, [data, focusMarker]);
 
   // renders
   return (
@@ -108,16 +173,23 @@ export const Map: React.FC<Props> = ({ data, professionalFocused, setProfessiona
           </S.CustomUserMarker>
         </S.UserMarker>
 
-        {data.map(
-          (professional) =>
-            professional && (
-              <ProfessionalMarker
-                focused={professionalFocused?.id === professional.id}
-                setProfessionalFocused={setProfessionalFocused}
-                professional={professional}
-                key={professional.id}
-              />
-            ),
+        {/* Renderizar primeiro os não focados */}
+        {orderedMarkers.nonFocusedProfessionals.map((professional) => (
+          <ProfessionalMarker
+            focused={false}
+            setProfessionalFocused={setProfessionalFocused}
+            professional={professional}
+            key={professional.id}
+          />
+        ))}
+        {/* Renderizar por último o focado para que fique sobreposto */}
+        {orderedMarkers.focusedProfessional && (
+          <ProfessionalMarker
+            focused={true}
+            setProfessionalFocused={setProfessionalFocused}
+            professional={orderedMarkers.focusedProfessional}
+            key={orderedMarkers.focusedProfessional.id}
+          />
         )}
       </S.Map>
     </S.Container>

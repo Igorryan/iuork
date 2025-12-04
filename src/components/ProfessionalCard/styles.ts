@@ -60,15 +60,20 @@ export const WobsDescription = styled(Text)`
   margin-bottom: 4px;
 `;
 
-export const Type = styled(Text)`
-  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
-  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
-
-  color: ${({ theme }) => theme.COLORS.GREY_80};
-
+export const ProfessionRow = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
   margin-top: 2px;
   margin-bottom: 6px;
   padding: 0 12px;
+`;
+
+export const Type = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_80};
+  margin-right: 8px;
 `;
 
 export const Distance = styled(Text)`
@@ -113,4 +118,24 @@ export const RatingCount = styled(Text)`
   font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
 
   color: ${({ theme }) => theme.COLORS.GREY};
+`;
+
+export const ModeTag = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  margin-right: 8px;
+`;
+
+export const ModeDot = styled(View)`
+  width: 3px;
+  height: 3px;
+  border-radius: 3px;
+  background-color: ${({ theme }) => theme.COLORS.GREY_80};
+  margin-right: 4px;
+`;
+
+export const ModeText = styled(Text)`
+  font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
+  font-size: ${({ theme }) => theme.FONT_SIZE.SSM}px;
+  color: ${({ theme }) => theme.COLORS.GREY_80};
 `;

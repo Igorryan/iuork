@@ -16,12 +16,10 @@ import styled from 'styled-components/native';
 // types
 
 // styles
-export const Container = styled(SafeAreaView)`
-  flex: 1;
-  background-color: ${({ theme }) => theme.COLORS.WHITE};
-`;
 
-export const Content = styled(ScrollView)``;
+export const Content = styled(ScrollView)<{ hasCarousel?: boolean }>`
+  ${({ hasCarousel }) => !hasCarousel && 'padding-top: 0;'}
+`;
 
 export const Divider = styled(View)`
   width: 100%;
@@ -30,10 +28,11 @@ export const Divider = styled(View)`
   background-color: ${({ theme }) => theme.COLORS.BACKGROUND};
 `;
 
-export const Header = styled(View)`
+export const Header = styled(View)<{ hasCarousel?: boolean }>`
   width: 100%;
 
   background-color: ${({ theme }) => theme.COLORS.WHITE};
+  ${({ hasCarousel }) => !hasCarousel && 'margin-top: 0;'}
 `;
 
 export const DisplayCarousel = styled(View)`

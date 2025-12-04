@@ -58,27 +58,43 @@ export const ProfessionalsHorizontalList: React.FC<Props> = ({
   const isSingle = data.length === 1;
   // account for horizontal padding of 10 on both sides when single
   const computedCardWidth = isSingle ? width - 20 : baseCardWidth;
+  const cardMargin = 10; // marginRight entre os cards
+  const containerPadding = 10; // paddingHorizontal do container
+  const snapInterval = computedCardWidth + cardMargin; // intervalo de snap incluindo margem
 
   useEffect(() => {
     if (!professionalFocused?.id) return;
 
     const professionalFocusedIndex = data.findIndex((p) => p.id === professionalFocused.id);
+    if (professionalFocusedIndex === -1) return;
+
+    // Calcular a posição considerando o padding inicial e o intervalo de snap
+    // O primeiro card já está no padding (posição 0), então não precisamos adicionar padding novamente
+    const scrollX = professionalFocusedIndex * snapInterval;
 
     scrollViewRef.current?.scrollTo({
-      x: professionalFocusedIndex * computedCardWidth,
+      x: scrollX,
+      animated: true,
     });
-  }, [data, professionalFocused, computedCardWidth]);
+  }, [data, professionalFocused, snapInterval]);
 
   useEffect(() => {
     if (!data || data.length === 0) return;
-    const professionalIndex = Math.ceil(position / computedCardWidth);
-    const professional = data[professionalIndex];
-    if (!professional || !professional.address) return;
-    setProfessionalFocused({
-      id: professional.id,
-      location: professional.address,
-    });
-  }, [data, position, setProfessionalFocused, computedCardWidth]);
+    
+    // Calcular o índice baseado na posição do scroll
+    // O snapInterval já considera o padding através do snapToAlignment
+    const professionalIndex = Math.round(position / snapInterval);
+    
+    if (professionalIndex >= 0 && professionalIndex < data.length) {
+      const professional = data[professionalIndex];
+      if (professional?.address) {
+        setProfessionalFocused({
+          id: professional.id,
+          location: professional.address,
+        });
+      }
+    }
+  }, [data, position, setProfessionalFocused, snapInterval]);
 
   // renders
   return (
@@ -93,9 +109,26 @@ export const ProfessionalsHorizontalList: React.FC<Props> = ({
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
         snapToAlignment="start"
-        snapToInterval={isSingle ? undefined : computedCardWidth}
+        snapToInterval={isSingle ? undefined : snapInterval}
         onMomentumScrollEnd={(e) => {
-          setPosition(Number(e.nativeEvent.contentOffset.x.toFixed(0)));
+          const scrollX = e.nativeEvent.contentOffset.x;
+          setPosition(Number(scrollX.toFixed(0)));
+          
+          // Garantir que o snap está alinhado corretamente
+          if (!isSingle) {
+            // O snapToInterval já considera o padding através do snapToAlignment="start"
+            // Mas precisamos garantir que está alinhado corretamente
+            const snappedIndex = Math.round(scrollX / snapInterval);
+            const snappedPosition = snappedIndex * snapInterval;
+            
+            // Se não estiver perfeitamente alinhado (com margem de erro de 5px), ajustar
+            if (Math.abs(scrollX - snappedPosition) > 5) {
+              scrollViewRef.current?.scrollTo({
+                x: snappedPosition,
+                animated: true,
+              });
+            }
+          }
         }}
         scrollEventThrottle={0}
         contentContainerStyle={{

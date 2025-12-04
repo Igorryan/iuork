@@ -27,6 +27,7 @@ import { getLastSearch, setLastSearch as saveSearch } from '@functions/searchSto
 import { getUserAddress } from '@functions/getUserAddress';
 import theme from '@theme/index';
 import { getProfessionCategories, type ProfessionCategory } from '@api/callbacks/profession-categories';
+import { api } from '@config/api';
 
 export type ProfessionalFocusedProps =
   | {
@@ -49,62 +50,98 @@ export const MapScreen: React.FC = () => {
   const [lastSearch, setLastSearchState] = useState<{ address: any; keyword: string } | undefined>(undefined);
   const [professionalFocused, setProfessionalFocused] = useState<ProfessionalFocusedProps>();
   const [categories, setCategories] = useState<ProfessionCategory[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<string>('');
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
 
   // Carregar última busca, profissionais e categorias
   useFocusEffect(
     React.useCallback(() => {
       let isMounted = true;
       (async () => {
-        const [professionals, search, categoriesData, address] = await Promise.all([
-          getAllProfessionals(),
+        const [search, categoriesData, address] = await Promise.all([
           getLastSearch(),
           getProfessionCategories(),
           getUserAddress(),
         ]);
+        
+        // Se tem busca salva, carregar profissionais com filtro do backend
+        if (search?.keyword && search.address) {
+          const professionals = await getAllProfessionals(
+            search.keyword,
+            search.address
+          );
+          if (isMounted) {
+            setAllProfessionals(professionals);
+            setLastSearchState(search);
+          }
+        } else {
+          // Sem busca, carregar todos (ou vazio)
+          const professionals = await getAllProfessionals();
+          if (isMounted) {
+            setAllProfessionals(professionals);
+            setLastSearchState(search);
+          }
+        }
+        
         if (isMounted) {
-          setAllProfessionals(professionals);
-          setLastSearchState(search);
           setCategories(categoriesData);
           if (address) {
-            const locationText = address.city && address.state 
-              ? `${address.city}, ${address.state}`
-              : address.city || address.state || '';
+            const parts = [];
+            if (address.street) {
+              parts.push(address.street);
+              if (address.number) {
+                parts.push(`${address.number}`);
+              }
+            }
+            if (address.district) {
+              parts.push(address.district);
+            }
+            if (address.city) {
+              parts.push(address.city);
+            }
+            if (address.state) {
+              parts.push(address.state);
+            }
+            const locationText = parts.length > 0 ? parts.join(', ') : '';
             setUserLocation(locationText);
           }
         }
       })();
+
+      // Buscar avatar atualizado do usuário
+      (async () => {
+        try {
+          const { data } = await api.get('/auth/me');
+          if (isMounted && data?.avatarUrl) {
+            setUserAvatarUrl(data.avatarUrl);
+          } else if (isMounted) {
+            setUserAvatarUrl(user?.avatarUrl || null);
+          }
+        } catch (error) {
+          // Se falhar, usar o avatar do contexto
+          if (isMounted) {
+            setUserAvatarUrl(user?.avatarUrl || null);
+          }
+        }
+      })();
+
       return () => {
         isMounted = false;
       };
-    }, []),
+    }, [user?.avatarUrl]),
   );
-
-  // Filtrar profissionais baseado na busca
-  const filteredProfessionals = useMemo(() => {
-    if (!lastSearch?.keyword || lastSearch.keyword.trim().length === 0) {
-      return [];
-    }
-
-    const keyword = lastSearch.keyword.toLowerCase().trim();
-    return allProfessionals.filter((prof) => {
-      // Buscar por profissão ou nome
-      const professionMatch = prof.profession?.toLowerCase().includes(keyword);
-      const nameMatch = prof.name.toLowerCase().includes(keyword);
-      return professionMatch || nameMatch;
-    });
-  }, [allProfessionals, lastSearch]);
-
-  // Determinar se deve mostrar mapa ou categorias
-  const shouldShowMap = useMemo(() => {
-    return lastSearch?.keyword && lastSearch.keyword.trim().length > 0 && filteredProfessionals.length > 0;
-  }, [lastSearch, filteredProfessionals]);
 
   // Handler para selecionar serviço/categoria
   const handleServicePress = async (serviceName: string) => {
     try {
       const address = await getUserAddress();
       if (address) {
+        // PRIMEIRO: Carregar profissionais com filtro do backend
+        const professionals = await getAllProfessionals(serviceName, address);
+        setAllProfessionals(professionals);
+        
+        // DEPOIS: Atualizar a busca
         await saveSearch({ address, keyword: serviceName });
         setLastSearchState({ address, keyword: serviceName });
       }
@@ -119,20 +156,21 @@ export const MapScreen: React.FC = () => {
   };
 
   // Handler para selecionar categoria
-  const handleCategoryPress = async (categorySlug: string) => {
-    try {
-      const address = await getUserAddress();
-      if (address) {
-        const category = categories.find(cat => cat.slug === categorySlug);
-        if (category?.professions && category.professions.length > 0) {
-          await saveSearch({ address, keyword: category.professions[0].name });
-          setLastSearchState({ address, keyword: category.professions[0].name });
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao salvar busca:', error);
+  const handleCategoryPress = (categoryId: string) => {
+    // Se já está selecionada, deseleciona
+    if (selectedCategoryId === categoryId) {
+      setSelectedCategoryId(null);
+    } else {
+      setSelectedCategoryId(categoryId);
     }
   };
+
+  // Determinar se deve mostrar mapa ou categorias
+  // Como o backend já filtra, usamos allProfessionals diretamente
+  const filteredProfessionals = allProfessionals;
+  const shouldShowMap = useMemo(() => {
+    return lastSearch?.keyword && lastSearch.keyword.trim().length > 0 && filteredProfessionals.length > 0;
+  }, [lastSearch, filteredProfessionals]);
 
   // callbacks
   function handleNavigate() {
@@ -148,6 +186,7 @@ export const MapScreen: React.FC = () => {
           <Header 
             onSearchCleared={() => {
               setLastSearchState(undefined);
+              setAllProfessionals([]);
             }}
           />
           <Map
@@ -176,8 +215,8 @@ export const MapScreen: React.FC = () => {
             <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
           {/* Header */}
           <HomeStyles.Header>
-            {user?.avatarUrl ? (
-              <HomeStyles.Avatar source={{ uri: user.avatarUrl }} />
+            {userAvatarUrl || user?.avatarUrl ? (
+              <HomeStyles.Avatar source={{ uri: userAvatarUrl || user?.avatarUrl || '' }} resizeMode="cover" />
             ) : (
               <HomeStyles.AvatarPlaceholder>
                 <Ionicons name="person" size={24} color="#9AA0A6" />
@@ -188,65 +227,16 @@ export const MapScreen: React.FC = () => {
               {userLocation ? (
                 <HomeStyles.LocationContainer>
                   <Ionicons name="location" size={14} color={theme.COLORS.SECONDARY} />
-                  <HomeStyles.LocationText>{userLocation}</HomeStyles.LocationText>
+                  <HomeStyles.LocationText numberOfLines={1} ellipsizeMode="tail">{userLocation}</HomeStyles.LocationText>
                 </HomeStyles.LocationContainer>
               ) : null}
             </HomeStyles.UserInfoContainer>
             <HomeStyles.HeaderActions>
-              <HomeStyles.HeaderButton activeOpacity={0.7} onPress={handleSearchPress}>
-                <Feather name="search" size={18} color={theme.COLORS.PRIMARY} />
-              </HomeStyles.HeaderButton>
               <HomeStyles.HeaderButton activeOpacity={0.7}>
                 <Ionicons name="notifications-outline" size={18} color={theme.COLORS.PRIMARY} />
               </HomeStyles.HeaderButton>
             </HomeStyles.HeaderActions>
           </HomeStyles.Header>
-
-          {/* Banner Promocional */}
-          <HomeStyles.BannerContainer>
-            <HomeStyles.BannerImage 
-              source={require('../../../assets/home/banner.png')}
-              resizeMode="cover"
-            />
-          </HomeStyles.BannerContainer>
-
-          {/* Seção de Categorias Horizontal */}
-          {categories.length > 0 && (
-            <HomeStyles.CategoriesSection>
-              <HomeStyles.SectionTitle>Selecione a Categoria</HomeStyles.SectionTitle>
-              <HomeStyles.CategoriesHorizontalList 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 24 }}
-              >
-                {categories.map((category) => (
-                  <HomeStyles.CategoryCard
-                    key={category.id}
-                    activeOpacity={0.7}
-                    onPress={() => handleCategoryPress(category.slug)}
-                    categoryColor={category.color || theme.COLORS.SECONDARY}
-                  >
-                    <HomeStyles.CategoryCardIconContainer categoryColor={category.color || theme.COLORS.SECONDARY}>
-                      {category.imageUrl ? (
-                        <Image 
-                          source={{ uri: category.imageUrl }} 
-                          style={{ width: 24, height: 24, borderRadius: 12 }}
-                          resizeMode="cover"
-                        />
-                      ) : (
-                        <Ionicons 
-                          name={(category.icon as any) || 'briefcase'} 
-                          size={24} 
-                          color={category.color || theme.COLORS.SECONDARY} 
-                        />
-                      )}
-                    </HomeStyles.CategoryCardIconContainer>
-                    <HomeStyles.CategoryCardName>{category.name}</HomeStyles.CategoryCardName>
-                  </HomeStyles.CategoryCard>
-                ))}
-              </HomeStyles.CategoriesHorizontalList>
-            </HomeStyles.CategoriesSection>
-          )}
 
           {/* Barra de Busca */}
           <HomeStyles.SearchRow>
@@ -259,8 +249,60 @@ export const MapScreen: React.FC = () => {
             </HomeStyles.FilterButton>
           </HomeStyles.SearchRow>
 
+          {/* Banner Promocional */}
+          <HomeStyles.BannerContainer>
+            <HomeStyles.BannerImage 
+              source={require('../../../assets/home/banner.png')}
+              resizeMode="contain"
+            />
+          </HomeStyles.BannerContainer>
+
+          {/* Seção de Categorias Horizontal */}
+          {categories.length > 0 && (
+            <HomeStyles.CategoriesSection>
+              <HomeStyles.SectionTitle>Procure por categoria</HomeStyles.SectionTitle>
+              <HomeStyles.CategoriesHorizontalList 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 24 }}
+              >
+                {categories.map((category) => {
+                  const isSelected = selectedCategoryId === category.id;
+                  return (
+                    <HomeStyles.CategoryCard
+                      key={category.id}
+                      activeOpacity={0.7}
+                      onPress={() => handleCategoryPress(category.id)}
+                      categoryColor={category.color || theme.COLORS.SECONDARY}
+                    >
+                      <HomeStyles.CategoryCardIconContainer 
+                        categoryColor={category.color || theme.COLORS.SECONDARY}
+                        isSelected={isSelected}
+                      >
+                          {/* <Image 
+                            source={{ uri: category.imageUrl }} 
+                            style={{ width: '100%', height: '100%', borderRadius: 50 }}
+                            resizeMode="cover"
+                          /> */}
+                          <Ionicons 
+                            name={(category.icon as any) || 'briefcase'} 
+                            size={24} 
+                            color={theme.COLORS.WHITE} 
+                          />
+                      </HomeStyles.CategoryCardIconContainer>
+                      <HomeStyles.CategoryCardName>{category.name}</HomeStyles.CategoryCardName>
+                    </HomeStyles.CategoryCard>
+                  );
+                })}
+              </HomeStyles.CategoriesHorizontalList>
+            </HomeStyles.CategoriesSection>
+          )}
+
           {/* Lista de Categorias com seus Serviços */}
-          {categories.map((category) => {
+          {(selectedCategoryId 
+            ? categories.filter(cat => cat.id === selectedCategoryId)
+            : categories
+          ).map((category) => {
             const professions = category.professions || [];
 
             return (
@@ -289,7 +331,14 @@ export const MapScreen: React.FC = () => {
                       categoryColor={category.color || theme.COLORS.SECONDARY}
                     >
                       <HomeStyles.ServiceIconContainerHorizontal categoryColor={category.color || theme.COLORS.SECONDARY}>
-                        <Ionicons name="briefcase-outline" size={18} color={category.color || theme.COLORS.SECONDARY} />
+                        {profession.imageUrl ? (
+                          <HomeStyles.ServiceImageHorizontal 
+                            source={{ uri: profession.imageUrl }} 
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Ionicons name="briefcase-outline" size={40} color={category.color || theme.COLORS.SECONDARY} />
+                        )}
                       </HomeStyles.ServiceIconContainerHorizontal>
                       <HomeStyles.ServiceNameHorizontal numberOfLines={2}>{profession.name}</HomeStyles.ServiceNameHorizontal>
                     </HomeStyles.ServiceCardHorizontal>
