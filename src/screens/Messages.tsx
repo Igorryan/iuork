@@ -45,11 +45,9 @@ const Messages: React.FC = () => {
     // Conectar WebSocket para receber novos chats em tempo real
     if (socket && user?.id) {
       socket.emit('join-client', user.id);
-      console.log('👤 Cliente conectado para notificações:', user.id);
 
       // Ouvir novo chat
       const handleNewChat = (newChat: Chat) => {
-        console.log('🔔 Novo chat recebido!', newChat);
         setChats((prev) => {
           // Evitar duplicatas
           if (prev.find(c => c.id === newChat.id)) {
@@ -61,23 +59,15 @@ const Messages: React.FC = () => {
 
       // Ouvir novas mensagens para atualizar a lista de chats
       const handleNewMessage = (newMessage: any) => {
-        console.log('🔔 Nova mensagem recebida na lista do cliente!', newMessage);
-        console.log('   - Chat ID:', newMessage.chatId);
-        console.log('   - Sender ID:', newMessage.senderId);
-        console.log('   - User ID:', user.id);
-        
         setChats((prev) => {
-          console.log('   - Chats atuais:', prev.length);
           const chatIndex = prev.findIndex(c => c.id === newMessage.chatId);
           
           if (chatIndex === -1) {
-            console.log('   - Chat não encontrado na lista, recarregando...');
             // Chat não encontrado, recarregar lista
             loadChats();
             return prev;
           }
 
-          console.log('   - Chat encontrado no índice:', chatIndex);
           const updatedChats = [...prev];
           const chat = { ...updatedChats[chatIndex] };
           
@@ -89,7 +79,6 @@ const Messages: React.FC = () => {
           
           // Atualizar contador de não lidas (se a mensagem não é minha)
           if (newMessage.senderId !== user.id && chat._count) {
-            console.log('   - Incrementando contador de não lidas');
             chat._count.messages = (chat._count.messages || 0) + 1;
           }
           
@@ -97,15 +86,12 @@ const Messages: React.FC = () => {
           updatedChats.splice(chatIndex, 1);
           
           // Adicionar no topo da lista
-          console.log('   - Chat movido para o topo da lista');
           return [chat, ...updatedChats];
         });
       };
 
       // Ouvir evento de mensagens lidas
       const handleMessageRead = (data: { chatId: string; userId: string }) => {
-        console.log('📖 Mensagens lidas no chat:', data.chatId, 'por usuário:', data.userId);
-        
         // Se eu fui quem leu, zerar o contador de não lidas
         if (data.userId === user.id) {
           setChats((prev) => {
@@ -124,7 +110,6 @@ const Messages: React.FC = () => {
             }
             
             updatedChats[chatIndex] = chat;
-            console.log('   - Contador de não lidas zerado');
             return updatedChats;
           });
         }
@@ -137,13 +122,10 @@ const Messages: React.FC = () => {
         lastMessage?: { content: string; senderId: string; createdAt: string };
         budget?: any;
       }) => {
-        console.log('🔄 [CLIENTE] Atualização de chat recebida:', data);
-        
         setChats((prev) => {
           const chatIndex = prev.findIndex(c => c.id === data.chatId);
           
           if (chatIndex === -1) {
-            console.log('   - Chat não encontrado, recarregando lista');
             loadChats();
             return prev;
           }
@@ -169,7 +151,6 @@ const Messages: React.FC = () => {
           // Atualizar budget se fornecido
           if (data.budget) {
             chat.budget = data.budget;
-            console.log(`   - Budget atualizado: status = ${data.budget.status}, price = ${data.budget.price}`);
           }
           
           updatedChats[chatIndex] = chat;
@@ -183,7 +164,6 @@ const Messages: React.FC = () => {
       socket.on('chat-list-update', handleChatListUpdate);
 
       return () => {
-        console.log('👤 Cliente desconectando listeners');
         socket.off(SocketEvents.NEW_CHAT, handleNewChat);
         socket.off(SocketEvents.NEW_MESSAGE, handleNewMessage);
         socket.off(SocketEvents.MESSAGE_READ, handleMessageRead);

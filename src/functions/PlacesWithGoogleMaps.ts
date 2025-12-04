@@ -18,8 +18,7 @@ export async function findPlaceFromText(text: string) {
 
     return result;
   } catch (error) {
-    console.log('Erro ao buscar endereço por texto utilizando Google Maps Api');
-    console.log(error);
+    // Erro silencioso
   }
 }
 
@@ -32,8 +31,7 @@ export async function findPlaceFromPlaceId(placeId: string) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return response.data.result as GooglePlaceDetail;
   } catch (error) {
-    console.log('Erro ao buscar endereço pelo ID do local utilizando Google Maps Api');
-    console.log(error);
+    // Erro silencioso
   }
 }
 
@@ -45,7 +43,6 @@ export async function findPlaceFromLatLng({ lat, lng }: ILatLngProps) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return response.data.results[0] as GooglePlaceDetail;
   } catch (error) {
-    console.log('Erro ao buscar endereço pelo ID do local utilizando Google Maps Api');
-    console.log(error);
+    // Erro silencioso
   }
 }

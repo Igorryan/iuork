@@ -82,7 +82,6 @@ export const ProfessionalProfile: React.FC = () => {
   // Entrar na sala do cliente para receber notificações de orçamentos
   useEffect(() => {
     if (socket && user?.id) {
-      console.log('🔌 [PROFILE] Entrando na sala do cliente:', user.id);
       socket.emit('join-client', user.id);
     }
   }, [socket, user?.id]);
@@ -91,8 +90,6 @@ export const ProfessionalProfile: React.FC = () => {
   useEffect(() => {
     if (socket && user?.id) {
       const handleNewBudget = (data: any) => {
-        console.log('🔔 [PROFILE] Novo orçamento recebido!', data);
-        
         const serviceId = data.serviceId;
         const price = parseFloat(data.price);
         
@@ -101,7 +98,6 @@ export const ProfessionalProfile: React.FC = () => {
           setAcceptedBudgets((prev) => {
             const updated = new Map(prev);
             updated.set(serviceId, price);
-            console.log('✅ [PROFILE] Preço atualizado para serviço:', serviceId, '- R$', price);
             return updated;
           });
           
@@ -175,7 +171,6 @@ export const ProfessionalProfile: React.FC = () => {
   // Recarregar orçamentos quando a tela recebe foco
   useFocusEffect(
     useCallback(() => {
-      console.log('🔄 [PROFILE] Tela recebeu foco - Recarregando orçamentos');
       loadBudgets();
     }, [loadBudgets])
   );
@@ -236,7 +231,7 @@ export const ProfessionalProfile: React.FC = () => {
         </S.BackButton>
 
         <S.ButtonsGroup>
-          <S.ShareButton onPress={() => console.log('Compartilhar')}>
+          <S.ShareButton onPress={() => {}}>
             <Ionicons name="share-outline" size={20} color="#000000" />
           </S.ShareButton>
           <S.LikeButton isSaved={isLiked} onPress={handleToggleFavorite}>

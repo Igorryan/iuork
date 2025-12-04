@@ -34,7 +34,7 @@ const Profile: React.FC = () => {
       console.error('Erro ao carregar dados do usuário:', error);
       // Se for erro 401, o token pode estar inválido ou expirado
       if (error?.response?.status === 401) {
-        console.warn('Token inválido ou expirado');
+        // Token inválido ou expirado
       }
     }
   };

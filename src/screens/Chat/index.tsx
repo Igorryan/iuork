@@ -23,14 +23,6 @@ export const Chat: React.FC = () => {
 
   const { professionalId, professionalName, professionalImage, serviceId, serviceName, sendBudgetRequest, sendBudgetAcceptanceMessage, budgetId } = route.params;
 
-  console.log('🔍 [CHAT] Parâmetros da rota:', {
-    professionalId,
-    serviceName,
-    sendBudgetRequest,
-    sendBudgetAcceptanceMessage,
-    budgetId
-  });
-
   const {
     messages,
     inputText,
@@ -74,7 +66,6 @@ export const Chat: React.FC = () => {
   // Entrar na sala do cliente para receber notificações
   useEffect(() => {
     if (socket && user?.id) {
-      console.log('🔌 [CHAT] Entrando na sala do cliente:', user.id);
       socket.emit('join-client', user.id);
     }
   }, [socket, user?.id]);
@@ -101,11 +92,6 @@ export const Chat: React.FC = () => {
 
         setCurrentBudget(budget);
         setBudgetStatus(budget.status);
-        console.log('📊 [CHAT] Orçamento carregado:', {
-          budgetId: budget.id,
-          status: budget.status,
-          price: budget.price
-        });
       } else {
         // Resetar se não houver orçamentos
         setCurrentBudget(null);
@@ -122,11 +108,8 @@ export const Chat: React.FC = () => {
   useEffect(() => {
     if (socket && user?.id) {
       const handleNewBudget = (data: any) => {
-        console.log('🔔 [CHAT] Novo orçamento recebido via WebSocket!', data);
-
         // Verificar se é para este chat/serviço
         if ((chatId && data.chatId === chatId) || (serviceId && data.serviceId === serviceId)) {
-          console.log('✅ [CHAT] Orçamento corresponde a este chat - Recarregando...');
           // Sempre recarregar o orçamento quando receber evento
           setTimeout(() => {
             loadBudget();
@@ -157,26 +140,15 @@ export const Chat: React.FC = () => {
 
   // Enviar mensagem automática de solicitação de orçamento
   useEffect(() => {
-    console.log('🔍 [CHAT] useEffect verificando:', {
-      sendBudgetRequest,
-      chatId,
-      budgetRequestSent,
-      messagesLength: messages.length,
-      isLoadingChat
-    });
-
     // Não precisa verificar chatId porque o sendMessageDirectly cria o chat automaticamente
     if (sendBudgetRequest && !budgetRequestSent && !isLoadingChat) {
-      console.log('📤 [CHAT] Enviando mensagem automática de solicitação de orçamento...');
       // Aguardar o chat estar pronto e enviar mensagem automática
       const sendAutomaticMessage = async () => {
         const budgetMessage = `Olá! Gostaria de solicitar um orçamento para o serviço: ${serviceName}.`;
 
-        console.log('📤 [CHAT] Enviando mensagem diretamente sem preencher input...');
         // Enviar mensagem diretamente sem preencher o input
         await sendMessageDirectly(budgetMessage);
         setBudgetRequestSent(true);
-        console.log('✅ [CHAT] Mensagem enviada e flag marcada');
       };
 
       sendAutomaticMessage();
@@ -186,13 +158,11 @@ export const Chat: React.FC = () => {
   // Enviar mensagem automática de aceitação de orçamento
   useEffect(() => {
     if (sendBudgetAcceptanceMessage && chatId && !budgetAcceptanceSent) {
-      console.log('📤 Enviando mensagem automática de aceitação de orçamento...');
       // Aguardar o chat estar pronto e enviar mensagem automática
       const sendAcceptanceMessage = async () => {
         const acceptanceMessage = `Olá, gostaria de realizar o serviço: ${serviceName}.`;
 
         // Enviar mensagem diretamente sem preencher o input
-        console.log('📤 [CHAT] Enviando mensagem de aceitação diretamente...');
         await sendMessageDirectly(acceptanceMessage);
         setBudgetAcceptanceSent(true);
       };

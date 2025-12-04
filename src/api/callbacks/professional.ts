@@ -1,5 +1,5 @@
 import { api } from '@config/api';
-import { Professional as IProfessional } from '@types/domain';
+import { Professional as IProfessional } from '../../types/domain';
 
 export async function getAllProfessionals(
   keyword?: string,
@@ -27,7 +27,6 @@ export async function getAllProfessionals(
     });
     return data;
   } catch (err) {
-    console.log(err);
     return [];
   }
 }
@@ -41,7 +40,6 @@ export async function getProfessional({
     const { data } = await api.get<IProfessional>(`/professionals/${professionalId}`);
     return data;
   } catch (err) {
-    console.log(err);
     return null;
   }
 }

@@ -60,12 +60,9 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
       
       // Entrar na sala do chat
       socket.emit('join-chat', chatId);
-      console.log('📥 Entrou na sala do chat:', chatId);
 
       // Handler para novas mensagens
       const handleNewMessage = (newMessage: APIMessage) => {
-        console.log('🔔 Nova mensagem recebida:', newMessage);
-        
         // Não adicionar se for minha própria mensagem (já foi adicionada otimisticamente)
         if (newMessage.senderId === userId) {
           setMessages((prev) => 
@@ -94,7 +91,6 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
         // Sair da sala ao desmontar
         socket.emit('leave-chat', chatId);
         socket.off(SocketEvents.NEW_MESSAGE, handleNewMessage);
-        console.log('📤 Saiu da sala do chat:', chatId);
       };
     }
   }, [chatId, socket, userId]);
@@ -105,12 +101,10 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
       
       // Se budgetId foi fornecido, buscar o chat daquele orçamento
       if (budgetId) {
-        console.log('📦 Buscando chat do orçamento:', budgetId);
         try {
           const { data } = await api.get(`/api/budgets/${budgetId}`);
           
           if (data && data.chatId) {
-            console.log('✅ Chat do orçamento encontrado:', data.chatId);
             setChatId(data.chatId);
             await fetchMessages(data.chatId);
             return;
@@ -128,11 +122,8 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
       });
 
       if (chat) {
-        console.log('📥 Chat existente encontrado:', chat.id);
         setChatId(chat.id);
         await fetchMessages(chat.id);
-      } else {
-        console.log('💬 Nenhum chat existente - será criado ao enviar primeira mensagem');
       }
     } catch (error) {
       console.error('Erro ao verificar chat:', error);
@@ -147,7 +138,6 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
       return chatId;
     }
 
-    console.log('🆕 Criando novo chat...');
     const chat = await createOrGetChat({
       clientId: userId,
       professionalId,
@@ -155,13 +145,11 @@ export const useChat = ({ professionalId, serviceId, userId, budgetId }: UseChat
     });
 
     if (chat) {
-      console.log('✅ Chat criado:', chat.id);
       setChatId(chat.id);
       
       // Entrar na sala do WebSocket após criar o chat
       if (socket) {
         socket.emit('join-chat', chat.id);
-        console.log('📥 Entrou na sala do chat:', chat.id);
       }
       
       return chat.id;

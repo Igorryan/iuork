@@ -132,8 +132,6 @@ export const BudgetDetail: React.FC = () => {
                 throw new Error('Falha ao cancelar orçamento');
               }
 
-              console.log('✅ Orçamento anterior cancelado:', budget.id);
-
               // 2. Criar novo orçamento (retorna com dados do chat)
               const newBudget = await createBudgetRequest(
                 user.id, 
@@ -144,8 +142,6 @@ export const BudgetDetail: React.FC = () => {
               if (!newBudget || !newBudget.chat) {
                 throw new Error('Falha ao criar novo orçamento');
               }
-
-              console.log('✅ Novo orçamento criado:', newBudget.id);
 
               // 3. Navegar para o chat do NOVO orçamento
               navigation.navigate('Chat', {

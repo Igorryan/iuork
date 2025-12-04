@@ -89,31 +89,9 @@ export const ServiceDetail: React.FC = () => {
   // Entrar na sala do cliente para receber notificações
   useEffect(() => {
     if (socket && user?.id) {
-      console.log('🔌 [SERVICE_DETAIL] Entrando na sala do cliente:', user.id);
       socket.emit('join-client', user.id);
     }
   }, [socket, user?.id]);
-
-  // Ouvir atualizações de orçamentos via WebSocket
-  useEffect(() => {
-    if (socket && user?.id) {
-      const handleNewBudget = (data: any) => {
-        console.log('🔔 [SERVICE_DETAIL] Novo orçamento recebido!', data);
-        
-        // Verificar se é para este serviço
-        if (data.serviceId === route.params.serviceId) {
-          // Recarregar orçamentos para garantir que o status está atualizado
-          loadBudgets();
-        }
-      };
-
-      socket.on('new-budget', handleNewBudget);
-
-      return () => {
-        socket.off('new-budget', handleNewBudget);
-      };
-    }
-  }, [socket, user?.id, route.params.serviceId, loadBudgets]);
 
   // Função para carregar orçamentos
   const loadBudgets = useCallback(async () => {
@@ -129,19 +107,16 @@ export const ServiceDetail: React.FC = () => {
       setAcceptedBudgetPrice(parseFloat(acceptedBudget.price));
       setCurrentBudget(acceptedBudget);
       setHasPendingBudget(false);
-      console.log('✅ [SERVICE_DETAIL] Orçamento aceito encontrado:', acceptedBudget.id);
     } else if (budgetWithPrice) {
       // Se tem orçamento com preço definido mas ainda pendente
       setAcceptedBudgetPrice(parseFloat(budgetWithPrice.price));
       setCurrentBudget(budgetWithPrice);
       setHasPendingBudget(false);
-      console.log('✅ [SERVICE_DETAIL] Orçamento com preço encontrado:', budgetWithPrice.id);
     } else if (pendingBudget) {
       // Se tem orçamento pendente (aguardando profissional definir preço)
       setAcceptedBudgetPrice(null);
       setHasPendingBudget(true);
       setCurrentBudget(pendingBudget);
-      console.log('✅ [SERVICE_DETAIL] Orçamento pendente encontrado:', pendingBudget.id);
     } else {
       // Não há orçamento
       setAcceptedBudgetPrice(null);
@@ -149,6 +124,25 @@ export const ServiceDetail: React.FC = () => {
       setCurrentBudget(null);
     }
   }, [route.params.serviceId, user?.id]);
+
+  // Ouvir atualizações de orçamentos via WebSocket
+  useEffect(() => {
+    if (socket && user?.id) {
+      const handleNewBudget = (data: any) => {
+        // Verificar se é para este serviço
+        if (data.serviceId === route.params.serviceId) {
+          // Recarregar orçamentos para garantir que o status está atualizado
+          loadBudgets();
+        }
+      };
+
+      socket.on('new-budget', handleNewBudget);
+
+      return () => {
+        socket.off('new-budget', handleNewBudget);
+      };
+    }
+  }, [socket, user?.id, route.params.serviceId, loadBudgets]);
 
   // Buscar orçamento aceito para este serviço e cliente
   useEffect(() => {
@@ -158,7 +152,6 @@ export const ServiceDetail: React.FC = () => {
   // Recarregar orçamentos quando a tela recebe foco
   useFocusEffect(
     useCallback(() => {
-      console.log('🔄 [SERVICE_DETAIL] Tela recebeu foco - Recarregando orçamentos');
       loadBudgets();
     }, [loadBudgets])
   );

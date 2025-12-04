@@ -23,7 +23,6 @@ export async function getProfessionCategories(): Promise<ProfessionCategory[]> {
     const { data } = await api.get<ProfessionCategory[]>('/profession-categories');
     return data;
   } catch (err) {
-    console.log(err);
     return [];
   }
 }
@@ -33,7 +32,6 @@ export async function getProfessionCategoryBySlug(slug: string): Promise<Profess
     const { data } = await api.get<ProfessionCategory>(`/profession-categories/${slug}/professions`);
     return data;
   } catch (err) {
-    console.log(err);
     return null;
   }
 }
