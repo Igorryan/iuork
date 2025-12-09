@@ -11,13 +11,18 @@ type WhatProps = {
   onPress(): void;
   value: string;
   setValue(text: string): void;
+  renderSuggestionsOutside?: boolean;
+  onRenderSuggestions?: (suggestions: React.ReactNode) => void;
+  onLayout?: (event: { nativeEvent: { layout: { y: number; height: number } } }) => void;
+  onSuggestionSelected?: () => void;
 };
 
-export const What: React.FC<WhatProps> = ({ isActive, onPress, value, setValue }) => {
+export const What: React.FC<WhatProps> = ({ isActive, onPress, value, setValue, renderSuggestionsOutside, onRenderSuggestions, onLayout, onSuggestionSelected }) => {
   const minimizedValue = useMemo(() => (value ? value : 'O que você precisa?'), [value]);
   const [suggestions, setSuggestions] = useState<Profession[]>([]);
   const [allProfessions, setAllProfessions] = useState<Profession[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isSuggestionSelected, setIsSuggestionSelected] = useState(false);
 
   // Carregar todas as profissões quando o componente é montado
   useEffect(() => {
@@ -41,10 +46,49 @@ export const What: React.FC<WhatProps> = ({ isActive, onPress, value, setValue }
     };
   }, []);
 
+  // Resetar isSuggestionSelected quando o usuário começar a digitar novamente
+  useEffect(() => {
+    if (isSuggestionSelected && value) {
+      // Verificar se o valor mudou (usuário está editando)
+      const exactMatch = allProfessions.find(profession => 
+        profession.name.toLowerCase().trim() === value.toLowerCase().trim()
+      );
+      // Se não houver correspondência exata, resetar o flag
+      if (!exactMatch) {
+        setIsSuggestionSelected(false);
+      }
+    }
+  }, [value, allProfessions, isSuggestionSelected]);
+
   // Filtrar sugestões baseado no texto digitado
   useEffect(() => {
+    // Se uma sugestão foi selecionada, não mostrar mais sugestões
+    if (isSuggestionSelected) {
+      setSuggestions([]);
+      if (onRenderSuggestions) {
+        onRenderSuggestions(null);
+      }
+      return;
+    }
+
     if (!value || value.trim().length < 2) {
       setSuggestions([]);
+      if (onRenderSuggestions) {
+        onRenderSuggestions(null);
+      }
+      return;
+    }
+
+    // Se o valor corresponde exatamente a uma profissão, não mostrar sugestões
+    const exactMatch = allProfessions.find(profession => 
+      profession.name.toLowerCase().trim() === value.toLowerCase().trim()
+    );
+    
+    if (exactMatch) {
+      setSuggestions([]);
+      if (onRenderSuggestions) {
+        onRenderSuggestions(null);
+      }
       return;
     }
 
@@ -54,12 +98,36 @@ export const What: React.FC<WhatProps> = ({ isActive, onPress, value, setValue }
     ).slice(0, 10); // Limitar a 10 sugestões
 
     setSuggestions(filtered);
-  }, [value, allProfessions]);
+  }, [value, allProfessions, onRenderSuggestions, isSuggestionSelected]);
+
+  // Renderizar sugestões fora quando necessário
+  useEffect(() => {
+    if (renderSuggestionsOutside && onRenderSuggestions) {
+      if (suggestions.length > 0 && !isSuggestionSelected) {
+        onRenderSuggestions(
+          <WhatSuggestions suggestions={suggestions} onSelect={handleSelectSuggestion} />
+        );
+      } else {
+        onRenderSuggestions(null);
+      }
+    }
+  }, [suggestions, renderSuggestionsOutside, onRenderSuggestions, handleSelectSuggestion, isSuggestionSelected]);
 
   const handleSelectSuggestion = useCallback((professionName: string) => {
+    setIsSuggestionSelected(true);
     setValue(professionName);
     setSuggestions([]);
-  }, [setValue]);
+    // Limpar sugestões imediatamente antes de chamar callbacks
+    if (onRenderSuggestions) {
+      onRenderSuggestions(null);
+    }
+    // Pequeno delay para garantir que o estado seja atualizado antes de colapsar
+    setTimeout(() => {
+      if (onSuggestionSelected) {
+        onSuggestionSelected();
+      }
+    }, 0);
+  }, [setValue, onRenderSuggestions, onSuggestionSelected]);
 
   const handleChangeText = useCallback((text: string) => {
     setValue(text);
@@ -71,6 +139,7 @@ export const What: React.FC<WhatProps> = ({ isActive, onPress, value, setValue }
       onPress={onPress}
       minimized={{ title: 'Profissional/Serviço', value: minimizedValue }}
       maximized={{ title: 'O que você precisa?' }}
+      onLayout={onLayout}
     >
       <InputWrapper>
         <InputContainer>
@@ -88,7 +157,7 @@ export const What: React.FC<WhatProps> = ({ isActive, onPress, value, setValue }
           )}
         </InputContainer>
 
-        {suggestions.length > 0 && (
+        {!renderSuggestionsOutside && suggestions.length > 0 && (
           <SuggestionsContainer pointerEvents="box-none">
             <SuggestionsListWrapper pointerEvents="auto">
               <SuggestionsList
@@ -114,9 +183,40 @@ export const What: React.FC<WhatProps> = ({ isActive, onPress, value, setValue }
   );
 };
 
+// Componente separado para renderizar sugestões fora do ExpansiveView
+export const WhatSuggestions: React.FC<{ suggestions: Profession[]; onSelect: (name: string) => void }> = ({ suggestions, onSelect }) => {
+  if (suggestions.length === 0) return null;
+
+  return (
+    <ExternalSuggestionsContainer pointerEvents="box-none">
+      <SuggestionsListWrapper pointerEvents="auto">
+        <SuggestionsList
+          data={suggestions}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <SuggestionItem 
+              onPress={() => onSelect(item.name)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="briefcase-outline" size={18} color={theme.COLORS.GREY_60} />
+              <SuggestionText>{item.name}</SuggestionText>
+            </SuggestionItem>
+          )}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+        />
+      </SuggestionsListWrapper>
+    </ExternalSuggestionsContainer>
+  );
+};
+
+const ExternalSuggestionsContainer = styled.View`
+  width: 100%;
+`;
+
 const InputWrapper = styled.View`
   position: relative;
-  z-index: 1;
+  z-index: 10;
 `;
 
 const InputContainer = styled.View`
@@ -144,9 +244,10 @@ const LoadingIndicator = styled.View`
 const SuggestionsContainer = styled.View`
   position: absolute;
   top: 62px;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+  left: -20px;
+  right: -20px;
+  z-index: 99999;
+  elevation: 20;
 `;
 
 const SuggestionsListWrapper = styled.View`
@@ -158,7 +259,7 @@ const SuggestionsListWrapper = styled.View`
   shadow-offset: 0px 4px;
   shadow-opacity: 0.1;
   shadow-radius: 8px;
-  elevation: 5;
+  elevation: 10;
 `;
 
 const SuggestionsList = styled(FlatList).attrs<{ data: Profession[] }>(() => ({}))`

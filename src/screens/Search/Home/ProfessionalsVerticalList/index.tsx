@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@routes/stack.routes';
 
 // components
 import { Header } from './Header';
@@ -18,6 +20,7 @@ import { getLastSearch } from '@functions/searchStorage';
 import * as S from './styles';
 
 export const ProfessionalsVerticalList: React.FC = () => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [allProfessionals, setAllProfessionals] = useState<IProfessional[]>([]);
   const [lastSearch, setLastSearch] = useState<{ address: any; keyword: string } | undefined>(undefined);
 
@@ -32,7 +35,8 @@ export const ProfessionalsVerticalList: React.FC = () => {
         if (search?.keyword && search.address) {
           const professionals = await getAllProfessionals(
             search.keyword,
-            search.address
+            search.address,
+            search.date || null
           );
           if (isMounted) {
             setAllProfessionals(professionals);
@@ -59,7 +63,8 @@ export const ProfessionalsVerticalList: React.FC = () => {
         try {
           const professionals = await getAllProfessionals(
             lastSearch.keyword,
-            lastSearch.address
+            lastSearch.address,
+            lastSearch.date || null
           );
           setAllProfessionals(professionals);
         } catch (error) {
@@ -67,7 +72,7 @@ export const ProfessionalsVerticalList: React.FC = () => {
         }
       })();
     }
-  }, [lastSearch?.keyword, lastSearch?.address?.latitude, lastSearch?.address?.longitude]);
+  }, [lastSearch?.keyword, lastSearch?.address?.latitude, lastSearch?.address?.longitude, lastSearch?.date]);
 
   // Como o backend já filtra, usar allProfessionals diretamente
   const filteredProfessionals = allProfessionals;
@@ -82,7 +87,10 @@ export const ProfessionalsVerticalList: React.FC = () => {
         data={filteredProfessionals}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <S.ProfessionalCardCustom professional={item} />
+          <S.ProfessionalCardCustom 
+            professional={item} 
+            onPress={() => navigation.navigate('SearchParams', { professionName: item.profession, openWhen: true })}
+          />
         )}
         showsVerticalScrollIndicator={false}
       />

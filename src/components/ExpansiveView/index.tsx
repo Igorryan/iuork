@@ -19,9 +19,10 @@ export const ExpansiveView: React.FC<ExpansiveViewProps> = ({
   minimized,
   maximized,
   children,
+  onLayout,
 }) => {
   return (
-    <S.ExpansiveView isActive={isActive}>
+    <S.ExpansiveView isActive={isActive} onLayout={onLayout}>
       <S.BlockMinimized onPress={onPress} isActive={!isActive}>
         <S.BlockMinimizedTitle>{minimized.title}</S.BlockMinimizedTitle>
         <S.BlockMinimizedValue>

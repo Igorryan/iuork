@@ -21,7 +21,7 @@ export type RootStackParamList = {
   Map: undefined;
   Login: undefined;
   SignUp: undefined;
-  SearchParams: { openMinimized?: boolean } | undefined;
+  SearchParams: { openMinimized?: boolean; professionName?: string; openWhen?: boolean } | undefined;
   ProfessionalsVerticalList: undefined;
   ProfessionalProfile: { professionalId: string };
   ServiceDetail: {

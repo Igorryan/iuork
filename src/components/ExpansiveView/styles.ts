@@ -19,6 +19,7 @@ export const ExpansiveView = styled(View).attrs<IBlockProps>(({ theme, isActive 
   border: 1px solid ${({ theme }) => theme.COLORS.GREY_10};
 
   border-radius: 24px;
+  overflow: visible;
 
   ${(props) =>
     !props.isActive &&
@@ -64,6 +65,7 @@ export const BlockMinimizedText = styled(Text)`
 
 export const BlockMaximized = styled(View)<IBlockProps>`
   padding: 20px 24px 24px;
+  overflow: visible;
 
   ${(props) =>
     !props.isActive &&

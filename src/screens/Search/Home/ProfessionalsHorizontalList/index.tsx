@@ -52,7 +52,7 @@ export const ProfessionalsHorizontalList: React.FC<Props> = ({
 
   const handleOpenProfessionalProfile = useCallback((professionalId: string) => {
     navigation.navigate('ProfessionalProfile', { professionalId });
-  }, []);
+  }, [navigation]);
 
   // computed
   const isSingle = data.length === 1;

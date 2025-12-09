@@ -34,4 +34,22 @@ api.interceptors.request.use(
   }
 );
 
+// Interceptor para tratar erros de resposta (401 = token inválido/expirado)
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    // Se for erro 401 (Unauthorized), o token está inválido ou expirado
+    if (error?.response?.status === 401) {
+      // Limpar dados de autenticação do AsyncStorage
+      try {
+        await AsyncStorage.multiRemove(['@client_token', '@client_user']);
+        delete api.defaults.headers.common.Authorization;
+      } catch (storageError) {
+        console.error('Erro ao limpar dados de autenticação:', storageError);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 

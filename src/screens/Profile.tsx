@@ -31,11 +31,18 @@ const Profile: React.FC = () => {
         setUserAvatar(data.avatarUrl);
       }
     } catch (error: any) {
-      console.error('Erro ao carregar dados do usuário:', error);
-      // Se for erro 401, o token pode estar inválido ou expirado
+      // Se for erro 401, o token está inválido/expirado e o interceptor já limpou os dados
+      // Não precisamos fazer nada aqui, apenas não mostrar o erro para o usuário
       if (error?.response?.status === 401) {
-        // Token inválido ou expirado
+        // O interceptor já tratou o logout automático
+        // Se o usuário ainda estiver autenticado localmente, fazer logout
+        if (isAuthenticated) {
+          logout();
+        }
+        return;
       }
+      // Para outros erros, apenas logar (sem mostrar alerta para não incomodar o usuário)
+      console.error('Erro ao carregar dados do usuário:', error);
     }
   };
 

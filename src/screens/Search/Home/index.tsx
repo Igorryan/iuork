@@ -69,7 +69,8 @@ export const MapScreen: React.FC = () => {
         if (search?.keyword && search.address) {
           const professionals = await getAllProfessionals(
             search.keyword,
-            search.address
+            search.address,
+            search.date || null
           );
           if (isMounted) {
             setAllProfessionals(professionals);
@@ -133,21 +134,9 @@ export const MapScreen: React.FC = () => {
   );
 
   // Handler para selecionar serviço/categoria
-  const handleServicePress = async (serviceName: string) => {
-    try {
-      const address = await getUserAddress();
-      if (address) {
-        // PRIMEIRO: Carregar profissionais com filtro do backend
-        const professionals = await getAllProfessionals(serviceName, address);
-        setAllProfessionals(professionals);
-        
-        // DEPOIS: Atualizar a busca
-        await saveSearch({ address, keyword: serviceName });
-        setLastSearchState({ address, keyword: serviceName });
-      }
-    } catch (error) {
-      console.error('Erro ao salvar busca:', error);
-    }
+  const handleServicePress = (serviceName: string) => {
+    // Navegar para SearchParams com o nome da profissão e abrir "Quando"
+    navigation.navigate('SearchParams', { professionName: serviceName, openWhen: true });
   };
 
   // Handler para buscar

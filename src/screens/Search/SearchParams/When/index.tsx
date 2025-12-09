@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled, { css } from 'styled-components/native';
 import { ExpansiveView } from '@components/ExpansiveView';
 import { addMonths, endOfMonth, format, getDay, startOfMonth, subMonths } from 'date-fns';
@@ -11,16 +11,35 @@ type WhenProps = {
 };
 
 export const When: React.FC<WhenProps> = ({ isActive, onPress, date, setDate }) => {
-  const [mode, setMode] = useState<'NOW' | 'PICK'>('NOW');
+  const [mode, setMode] = useState<'TODAY' | 'PICK' | 'FLEXIBLE'>('TODAY');
   const [visibleMonth, setVisibleMonth] = useState<Date>(new Date());
+
+  // Inicializar data como hoje quando o modo é TODAY e não há data selecionada
+  useEffect(() => {
+    if (mode === 'TODAY' && !date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      setDate(today);
+    }
+  }, [mode]);
 
   const minimizedValue = useMemo(() => {
     if (date) return format(date, 'dd/MM/yyyy');
-    return 'Agora';
-  }, [date]);
+    if (mode === 'TODAY') return 'Hoje';
+    if (mode === 'FLEXIBLE') return 'Flexível';
+    return 'Para quando?';
+  }, [date, mode]);
 
-  function handleSelectNow() {
-    setMode('NOW');
+  function handleSelectToday() {
+    setMode('TODAY');
+    // Definir data como hoje quando selecionar "Hoje"
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    setDate(today);
+  }
+
+  function handleSelectFlexible() {
+    setMode('FLEXIBLE');
     setDate(null);
   }
 
@@ -54,11 +73,14 @@ export const When: React.FC<WhenProps> = ({ isActive, onPress, date, setDate }) 
       maximized={{ title: 'Para quando?' }}
     >
       <Segmented>
-        <SegmentButton active={mode === 'NOW'} onPress={handleSelectNow}>
-          <SegmentText active={mode === 'NOW'}>Agora</SegmentText>
+        <SegmentButton active={mode === 'TODAY'} onPress={handleSelectToday} style={{ flex: 0.9 }}>
+          <SegmentText active={mode === 'TODAY'}>Hoje</SegmentText>
         </SegmentButton>
-        <SegmentButton active={mode === 'PICK'} onPress={() => setMode('PICK')}>
+        <SegmentButton active={mode === 'PICK'} onPress={() => setMode('PICK')} style={{ flex: 1.4 }}>
           <SegmentText active={mode === 'PICK'}>Escolher data</SegmentText>
+        </SegmentButton>
+        <SegmentButton active={mode === 'FLEXIBLE'} onPress={handleSelectFlexible} style={{ flex: 0.9 }}>
+          <SegmentText active={mode === 'FLEXIBLE'}>Flexível</SegmentText>
         </SegmentButton>
       </Segmented>
 
@@ -75,8 +97,8 @@ export const When: React.FC<WhenProps> = ({ isActive, onPress, date, setDate }) 
           </MonthHeader>
 
           <WeekDaysRow>
-            {weekDayLabels.map((label) => (
-              <WeekDay key={label}>{label}</WeekDay>
+            {weekDayLabels.map((label, index) => (
+              <WeekDay key={`weekday-${index}`}>{label}</WeekDay>
             ))}
           </WeekDaysRow>
 
@@ -107,10 +129,10 @@ const Segmented = styled.View`
 `;
 
 const SegmentButton = styled.TouchableOpacity<{ active: boolean }>`
-  flex: 1;
   padding: 10px 12px;
   border-radius: 999px;
   align-items: center;
+  min-width: 0;
   ${(p) =>
     p.active &&
     css`

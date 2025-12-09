@@ -7,14 +7,10 @@ import { Price } from '@components/Price';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@routes/stack.routes';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
 import { Alert } from 'react-native';
 
-
 // application
-import { BudgetRequestModal } from '@components/BudgetRequestModal';
-import { createBudgetRequest, cancelBudget, Budget } from '@api/callbacks/budget';
-import { useAuth } from '@hooks/auth';
+import { Budget } from '@api/callbacks/budget';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import theme from '@theme/index';
 
@@ -37,6 +33,8 @@ type FooterProps = {
   budgetId?: string | null;
   budgetStatus?: 'PENDING' | 'QUOTED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED';
   currentBudget?: Budget | null;
+  onRequestBudget?: () => void;
+  onContract?: () => void;
 };
 
 export const Footer: React.FC<FooterProps> = ({
@@ -49,39 +47,11 @@ export const Footer: React.FC<FooterProps> = ({
   budgetId,
   budgetStatus,
   currentBudget,
+  onRequestBudget,
+  onContract,
 }) => {
   // hooks
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { user } = useAuth();
-  const [showBudgetModal, setShowBudgetModal] = useState(false);
-  const [isCreatingRequest, setIsCreatingRequest] = useState(false);
-
-  const handleConfirmBudget = async () => {
-    if (!professionalData || !serviceId || !user?.id) return;
-
-    setShowBudgetModal(false);
-    setIsCreatingRequest(true);
-
-    try {
-      // Criar solicitação de orçamento no banco de dados
-      await createBudgetRequest(user.id, professionalData.id, serviceId);
-
-      // Navegar para o chat
-      navigation.navigate('Chat', {
-        professionalId: professionalData.id,
-        professionalName: professionalData.name,
-        professionalImage: professionalData.image,
-        serviceId,
-        serviceName: serviceName || '',
-        sendBudgetRequest: true, // Flag para enviar mensagem automática
-      });
-    } catch (error) {
-      console.error('Erro ao criar solicitação de orçamento:', error);
-      Alert.alert('Erro', 'Não foi possível criar a solicitação. Tente novamente.');
-    } finally {
-      setIsCreatingRequest(false);
-    }
-  };
 
   const formatExpiryDate = (dateString: string | null) => {
     if (!dateString) return null;
@@ -147,18 +117,7 @@ export const Footer: React.FC<FooterProps> = ({
   const hasOtherBudgetStatus = budgetStatus && budgetStatus !== 'ACCEPTED' && budgetStatus !== 'QUOTED' && budgetStatus !== 'PENDING';
 
   return (
-    <>
-      <BudgetRequestModal
-        visible={showBudgetModal}
-        onClose={() => setShowBudgetModal(false)}
-        onConfirm={handleConfirmBudget}
-        serviceName={serviceName || ''}
-        serviceDescription={serviceDescription}
-        professionalName={professionalData?.name || ''}
-        professionalImage={professionalData?.image || ''}
-      />
-
-      <S.Footer>
+    <S.Footer>
         {/* Status: ACCEPTED - Orçamento finalizado */}
         {hasAcceptedBudget && (
           <S.BudgetFinalizedContainer>
@@ -178,10 +137,7 @@ export const Footer: React.FC<FooterProps> = ({
             </S.BudgetFinalizedPriceCard>
 
             <S.BudgetFinalizedActions>
-            <S.ContractButton onPress={() => {
-                // Navegar para contratar ou executar ação de contratação
-                handleViewAcceptedBudget();
-              }}>
+            <S.ContractButton onPress={onContract || handleViewAcceptedBudget}>
                 <S.ContractButtonText>Contratar</S.ContractButtonText>
               </S.ContractButton>
               <S.ViewBudgetButton onPress={handleViewAcceptedBudget}>
@@ -260,16 +216,15 @@ export const Footer: React.FC<FooterProps> = ({
               {servicePrice !== 0 && <Price priceValue={parseFloat(servicePrice.toFixed(2).replace('.', ','))} pricingType={pricingType} />}
 
               {servicePrice !== 0 ? (
-                <Button>Contratar</Button>
+                <Button onPress={onContract}>Contratar</Button>
               ) : (
-                <S.RequestBudgetButton onPress={() => setShowBudgetModal(true)}>
+                <S.RequestBudgetButton onPress={onRequestBudget}>
                   <S.RequestBudgetText>Solicitar orçamento</S.RequestBudgetText>
                 </S.RequestBudgetButton>
               )}
             </S.PriceButtonContainer>
           </>
         )}
-      </S.Footer>
-    </>
+    </S.Footer>
   );
 };

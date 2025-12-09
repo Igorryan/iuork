@@ -7,13 +7,17 @@ import * as S from './styles';
 import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@routes/stack.routes';
-import { Alert, StatusBar, Platform, View } from 'react-native';
+import { Alert, StatusBar, Platform, View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 
 // application
 import { RatingView } from '@components/RatingView';
 import { useAuth } from '@hooks/auth';
 import { getAcceptedBudget, getPendingBudget, getBudgetWithPrice, Budget, createBudgetRequest } from '@api/callbacks/budget';
+import { BudgetRequestModal } from '@components/BudgetRequestModal';
+import { ScheduleBookingModal } from '@components/ScheduleBookingModal';
+import { createBooking } from '@api/callbacks/booking';
+import { getUserAddress } from '@functions/getUserAddress';
 
 // consts
 
@@ -57,6 +61,8 @@ export const ServiceDetail: React.FC = () => {
   const [acceptedBudgetPrice, setAcceptedBudgetPrice] = useState<number | null>(null);
   const [hasPendingBudget, setHasPendingBudget] = useState(false);
   const [currentBudget, setCurrentBudget] = useState<Budget | null>(null);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -157,6 +163,73 @@ export const ServiceDetail: React.FC = () => {
   );
 
   // callbacks
+  const handleConfirmBudget = async () => {
+    if (!route.params.professionalData || !route.params.serviceId || !user?.id) return;
+
+    setShowBudgetModal(false);
+
+    try {
+      // Criar solicitação de orçamento no banco de dados
+      await createBudgetRequest(user.id, route.params.professionalData.id, route.params.serviceId);
+
+      // Navegar para o chat
+      navigation.navigate('Chat', {
+        professionalId: route.params.professionalData.id,
+        professionalName: route.params.professionalData.name,
+        professionalImage: route.params.professionalData.image,
+        serviceId: route.params.serviceId,
+        serviceName: service?.name || '',
+        sendBudgetRequest: true, // Flag para enviar mensagem automática
+      });
+    } catch (error) {
+      console.error('Erro ao criar solicitação de orçamento:', error);
+      Alert.alert('Erro', 'Não foi possível criar a solicitação. Tente novamente.');
+    }
+  };
+
+  const handleScheduleBooking = async (selectedDate: Date, selectedTime: string) => {
+    if (!user?.id || !route.params.professionalData || !route.params.serviceId) {
+      Alert.alert('Erro', 'Informações insuficientes para agendar.');
+      return;
+    }
+
+    setShowScheduleModal(false);
+
+    try {
+      // Buscar endereço do usuário
+      const userAddress = await getUserAddress();
+
+      // Criar agendamento
+      await createBooking({
+        professionalId: route.params.professionalData.id,
+        serviceId: route.params.serviceId,
+        scheduledAt: selectedDate,
+        latitude: userAddress?.latitude,
+        longitude: userAddress?.longitude,
+        address: userAddress 
+          ? `${userAddress.street}, ${userAddress.number} - ${userAddress.district}, ${userAddress.city}`
+          : undefined,
+      });
+
+      Alert.alert(
+        'Solicitação Enviada!',
+        `Sua solicitação de agendamento para ${selectedDate.toLocaleDateString('pt-BR')} às ${selectedTime} foi enviada ao profissional. Você será notificado quando ele aceitar ou recusar.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Recarregar dados ou navegar
+              loadBudgets();
+            },
+          },
+        ]
+      );
+    } catch (error: any) {
+      console.error('Erro ao criar agendamento:', error);
+      Alert.alert('Erro', error.message || 'Não foi possível criar o agendamento. Tente novamente.');
+    }
+  };
+
   const handleRequestNewBudget = async () => {
     if (!user?.id || !route.params.professionalData?.id || !route.params.serviceId) {
       Alert.alert('Erro', 'Informações insuficientes para solicitar orçamento.');
@@ -276,7 +349,28 @@ export const ServiceDetail: React.FC = () => {
         budgetId={currentBudget?.id || null}
         budgetStatus={currentBudget?.status}
         currentBudget={currentBudget}
+        onRequestBudget={() => setShowBudgetModal(true)}
+        onContract={() => setShowScheduleModal(true)}
       />
+      
+      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+        <BudgetRequestModal
+          visible={showBudgetModal}
+          onClose={() => setShowBudgetModal(false)}
+          onConfirm={handleConfirmBudget}
+          serviceName={service?.name || ''}
+          serviceDescription={service?.description || ''}
+          professionalName={route.params.professionalData.name}
+          professionalImage={route.params.professionalData.image}
+        />
+
+        <ScheduleBookingModal
+          visible={showScheduleModal}
+          onClose={() => setShowScheduleModal(false)}
+          onConfirm={handleScheduleBooking}
+          professionalId={route.params.professionalData.id}
+        />
+      </View>
     </SafeAreaView>
   );
 };

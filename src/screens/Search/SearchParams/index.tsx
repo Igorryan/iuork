@@ -14,6 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Footer } from './Footer';
 import { Where } from './Where';
 import { What } from './What';
+import { When } from './When';
 import { IAddress } from 'src/types/address';
 import { setUserAddress, getUserAddress } from '@functions/getUserAddress';
 import { findPlaceFromLatLng } from '@functions/PlacesWithGoogleMaps';
@@ -30,9 +31,13 @@ export const SearchParams: React.FC = () => {
   // states
   const [addressViewFocused, setAddressViewFocused] = useState(true);
   const [whatViewFocused, setWhatViewFocused] = useState(false);
+  const [whenViewFocused, setWhenViewFocused] = useState(false);
   const [address, setAddress] = useState<IAddress>();
   const [suggestedAddress, setSuggestedAddress] = useState<IAddress>();
   const [keyword, setKeyword] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [whatSuggestions, setWhatSuggestions] = useState<React.ReactNode>(null);
+  const [whatInputPosition, setWhatInputPosition] = useState<{ y: number; height: number } | null>(null);
 
   // Carregar última busca salva
   useEffect(() => {
@@ -71,10 +76,23 @@ export const SearchParams: React.FC = () => {
 
   useEffect(() => {
     // if opened from Home with openMinimized, keep both minimized
-    const params = (route as any)?.params as { openMinimized?: boolean } | undefined;
+    const params = (route as any)?.params as { openMinimized?: boolean; professionName?: string; openWhen?: boolean } | undefined;
     if (params?.openMinimized) {
       setAddressViewFocused(false);
       setWhatViewFocused(false);
+      setWhenViewFocused(false);
+    }
+    
+    // Se veio com professionName, preencher o campo e abrir "Quando"
+    if (params?.professionName) {
+      setKeyword(params.professionName);
+      setAddressViewFocused(false);
+      setWhatViewFocused(false);
+      if (params.openWhen) {
+        setWhenViewFocused(true);
+      } else {
+        setWhatViewFocused(true);
+      }
     }
   }, [route]);
 
@@ -84,6 +102,7 @@ export const SearchParams: React.FC = () => {
       if (!params?.openMinimized) {
         setAddressViewFocused(false);
         setWhatViewFocused(true);
+        setWhenViewFocused(false);
       }
     }
   }, [address, route]);
@@ -141,6 +160,19 @@ export const SearchParams: React.FC = () => {
   function handleOpenWhatView() {
     setAddressViewFocused(false);
     setWhatViewFocused(true);
+    setWhenViewFocused(false);
+  }
+
+  function handleOpenWhenView() {
+    setAddressViewFocused(false);
+    setWhatViewFocused(false);
+    setWhenViewFocused(true);
+  }
+
+  function handleSuggestionSelected() {
+    setWhatSuggestions(null);
+    setWhatViewFocused(false);
+    setWhenViewFocused(true);
   }
 
   function handleAddressSelected() {
@@ -157,7 +189,9 @@ export const SearchParams: React.FC = () => {
   function navigate() {
     if (!address) return;
     setUserAddress(address);
-    setLastSearch({ address, keyword: keyword.trim() });
+    // Converter data para formato ISO (YYYY-MM-DD) se selecionada
+    const dateStr = selectedDate ? selectedDate.toISOString().split('T')[0] : null;
+    setLastSearch({ address, keyword: keyword.trim(), date: dateStr });
     navigation.navigate('Tabs' as any, { screen: 'SearchTab' } as any);
   }
 
@@ -196,6 +230,36 @@ export const SearchParams: React.FC = () => {
             value={keyword}
             setValue={setKeyword}
             onPress={handleOpenWhatView}
+            renderSuggestionsOutside={true}
+            onRenderSuggestions={setWhatSuggestions}
+            onLayout={(event) => {
+              const { y, height } = event.nativeEvent.layout;
+              setWhatInputPosition({ y, height });
+            }}
+            onSuggestionSelected={handleSuggestionSelected}
+          />
+
+          {whatSuggestions && (
+            <S.SuggestionsWrapper 
+              style={whatInputPosition ? { 
+                position: 'absolute',
+                top: whatInputPosition.y + whatInputPosition.height + 8,
+                left: 20,
+                right: 20,
+              } : { 
+                position: 'relative',
+                marginTop: 8,
+              }}
+            >
+              {whatSuggestions}
+            </S.SuggestionsWrapper>
+          )}
+
+          <When
+            isActive={whenViewFocused}
+            date={selectedDate}
+            setDate={setSelectedDate}
+            onPress={handleOpenWhenView}
           />
         </S.ContentView>
 

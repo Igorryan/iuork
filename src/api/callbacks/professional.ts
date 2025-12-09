@@ -3,7 +3,8 @@ import { Professional as IProfessional } from '../../types/domain';
 
 export async function getAllProfessionals(
   keyword?: string,
-  clientAddress?: { latitude: number; longitude: number }
+  clientAddress?: { latitude: number; longitude: number },
+  date?: string | null // Data no formato ISO (YYYY-MM-DD) ou null
 ): Promise<IProfessional[]> {
   try {
     const params: any = {};
@@ -15,6 +16,10 @@ export async function getAllProfessionals(
     if (clientAddress?.latitude && clientAddress?.longitude) {
       params.clientLat = clientAddress.latitude;
       params.clientLng = clientAddress.longitude;
+    }
+    
+    if (date && date.trim().length > 0) {
+      params.date = date.trim();
     }
     
     const { data } = await api.get<IProfessional[]>('/professionals', {

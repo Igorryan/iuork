@@ -3,6 +3,7 @@ import { ThemeProvider } from 'styled-components';
 import theme from './src/theme';
 import AppProvider from '@hooks/index';
 import { Routes } from '@routes/index';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import {
   useFonts,
@@ -21,14 +22,16 @@ export default function App() {
   });
 
   return (
-    <ThemeProvider theme={theme}>
-      {fontsLoaded ? (
-        <AppProvider>
-          <Routes />
-        </AppProvider>
-      ) : (
-        <View />
-      )}
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider theme={theme}>
+        {fontsLoaded ? (
+          <AppProvider>
+            <Routes />
+          </AppProvider>
+        ) : (
+          <View />
+        )}
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

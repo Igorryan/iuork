@@ -11,6 +11,7 @@ export const ContentView = styled(View)`
   flex: 1;
   padding: 20px;
   gap: 10px;
+  position: relative;
 `;
 
 export const CloseIconContainer = styled(TouchableOpacity)`
@@ -26,5 +27,10 @@ export const CloseIcon = styled(Ionicons).attrs(({ theme }) => ({
 
 export const BottomSafeArea = styled(View)`
   background-color: ${({ theme }) => theme.COLORS.WHITE};
+`;
+
+export const SuggestionsWrapper = styled(View)`
+  z-index: 99999;
+  elevation: 20;
 `;
  

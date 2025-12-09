@@ -4,6 +4,7 @@ import type { Address } from './getUserAddress';
 export type SearchQuery = {
   address: Address;
   keyword: string;
+  date?: string | null; // Data no formato ISO (YYYY-MM-DD) ou null
 };
 
 const SEARCH_KEY = '@client_last_search';
